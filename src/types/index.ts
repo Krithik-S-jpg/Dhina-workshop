@@ -5,6 +5,7 @@ export interface Service {
   hsnCode: string;
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
+  stock?: number;
 }
 
 export interface CarModel {

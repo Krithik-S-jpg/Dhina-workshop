@@ -19,7 +19,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isAddingNewCar, setIsAddingNewCar] = useState(false);
-  const [activeTab, setActiveTab] = useState<'services' | 'cars'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory'>('services');
   const [newService, setNewService] = useState<Partial<Service>>({
     name: '',
     price: 0,
@@ -172,6 +172,16 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             >
               Car Models Management
             </button>
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'inventory'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Inventory Management
+            </button>
              <button
               onClick={onViewBillRecords}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
@@ -283,6 +293,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                   placeholder="Enter description"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Stock
+                </label>
+                <input
+                  type="number"
+                  value={newService.stock ?? ''}
+                  onChange={(e) => setNewService({ ...newService, stock: e.target.value === '' ? undefined : Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter stock level (optional)"
+                />
+              </div>
             </div>
             <div className="flex space-x-2 mt-4">
               <button
@@ -370,6 +392,9 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                       Description
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Stock
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -432,6 +457,19 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                           <div className="text-sm text-slate-600">{service.description}</div>
                         )}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingService?.id === service.id ? (
+                          <input
+                            type="number"
+                            value={editingService.stock ?? ''}
+                            onChange={(e) => setEditingService({ ...editingService, stock: e.target.value === '' ? undefined : Number(e.target.value) })}
+                            className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="N/A"
+                          />
+                        ) : (
+                          <div className="text-sm text-slate-900">{service.stock ?? 'N/A'}</div>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {editingService?.id === service.id ? (
                           <div className="flex space-x-2">
@@ -464,6 +502,58 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                             </button>
                           </div>
                         )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'inventory' && (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Service Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Stock Level
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {services.map(service => (
+                    <tr key={service.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-slate-900">{service.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {categoryOptions.find(opt => opt.value === service.category)?.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="number"
+                          value={service.stock ?? ''}
+                          onChange={(e) => {
+                            const updatedServices = services.map(s =>
+                              s.id === service.id
+                                ? { ...s, stock: e.target.value === '' ? undefined : Number(e.target.value) }
+                                : s
+                            );
+                            onUpdateServices(updatedServices);
+                          }}
+                          className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="N/A"
+                        />
                       </td>
                     </tr>
                   ))}

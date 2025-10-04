@@ -27,13 +27,23 @@ function App() {
     setCurrentView('service-selection');
   };
 
-  const handleServiceToggle = (service: Service) => {
+  const handleBillItemChange = (service: Service, quantity: number) => {
     setBillItems(prevItems => {
       const existingItem = prevItems.find(item => item.service.id === service.id);
-      if (existingItem) {
+
+      if (quantity <= 0) {
+        // Remove item if quantity is 0 or less
         return prevItems.filter(item => item.service.id !== service.id);
+      }
+
+      if (existingItem) {
+        // Update quantity if item exists
+        return prevItems.map(item =>
+          item.service.id === service.id ? { ...item, quantity } : item
+        );
       } else {
-        return [...prevItems, { service, quantity: 1, selected: true }];
+        // Add new item if it doesn't exist
+        return [...prevItems, { service, quantity, selected: true }];
       }
     });
   };
@@ -44,6 +54,19 @@ function App() {
   };
 
   const handleSaveBill = (bill: SavedBill) => {
+    // Deduct stock from inventory
+    const updatedServices = services.map(service => {
+      const billedItem = billItems.find(item => item.service.id === service.id);
+      if (billedItem && service.stock !== undefined) {
+        return {
+          ...service,
+          stock: service.stock - billedItem.quantity,
+        };
+      }
+      return service;
+    });
+    setServices(updatedServices);
+
     setSavedBills(prevBills => [...prevBills, bill]);
     setBillItems([]); // Clear current bill
     setCurrentView('home'); // or 'bill-records'
@@ -116,7 +139,7 @@ function App() {
         onBack={handleNavigateHome}
         onViewBill={handleViewBill}
         billItems={billItems}
-        onServiceToggle={handleServiceToggle}
+        onBillItemChange={handleBillItemChange}
       />
     );
   }
