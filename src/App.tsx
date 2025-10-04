@@ -5,30 +5,52 @@ import { ServiceSelection } from './components/ServiceSelection';
 import { BillView } from './components/BillView';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminPanel } from './components/AdminPanel';
+import { BillRecords } from './components/BillRecords';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { Service, CarModel } from './types';
+import { Service, CarModel, BillItem, SavedBill } from './types';
 import { carModels, initialServices, defaultGstPercentage } from './data/mockData';
 
-type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel';
+type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
   const [selectedCategory, setSelectedCategory] = useState<'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service'>('water-service');
-  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
+  const [billItems, setBillItems] = useState<BillItem[]>([]);
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
   const [services, setServices] = useLocalStorage<Service[]>('car-wash-services', initialServices);
   const [carModelsList, setCarModelsList] = useLocalStorage<CarModel[]>('car-models', carModels);
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
+  const [savedBills, setSavedBills] = useLocalStorage<SavedBill[]>('car-wash-saved-bills', []);
 
   const handleServiceCardClick = (category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service') => {
     setSelectedCategory(category);
     setCurrentView('service-selection');
   };
 
-  const handleViewBill = (services: Service[], carModel: CarModel) => {
-    setSelectedServices(services);
+  const handleServiceToggle = (service: Service) => {
+    setBillItems(prevItems => {
+      const existingItem = prevItems.find(item => item.service.id === service.id);
+      if (existingItem) {
+        return prevItems.filter(item => item.service.id !== service.id);
+      } else {
+        return [...prevItems, { service, quantity: 1, selected: true }];
+      }
+    });
+  };
+
+  const handleViewBill = (carModel: CarModel) => {
     setSelectedCarModel(carModel);
     setCurrentView('bill');
+  };
+
+  const handleSaveBill = (bill: SavedBill) => {
+    setSavedBills(prevBills => [...prevBills, bill]);
+    setBillItems([]); // Clear current bill
+    setCurrentView('home'); // or 'bill-records'
+  };
+
+  const handleViewBillRecords = () => {
+    setCurrentView('bill-records');
   };
 
   const handleAdminLogin = () => {
@@ -40,11 +62,20 @@ function App() {
   };
 
   const handleBackToHome = () => {
+    setBillItems([]);
+    setCurrentView('home');
+  };
+
+  const handleNavigateHome = () => {
     setCurrentView('home');
   };
 
   const handleBackToServices = () => {
     setCurrentView('service-selection');
+  };
+
+  const handleBackToAdminPanel = () => {
+    setCurrentView('admin-panel');
   };
 
   const handleUpdateServices = (updatedServices: Service[]) => {
@@ -56,12 +87,7 @@ function App() {
   };
 
   if (currentView === 'admin-login') {
-    return (
-      <AdminLogin
-        onBack={handleBackToHome}
-        onLogin={handleAdminLoginSuccess}
-      />
-    );
+    return <AdminLogin onBack={handleBackToHome} onLogin={handleAdminLoginSuccess} />;
   }
 
   if (currentView === 'admin-panel') {
@@ -72,8 +98,13 @@ function App() {
         onBack={handleBackToHome}
         onUpdateServices={handleUpdateServices}
         onUpdateCarModels={handleUpdateCarModels}
+        onViewBillRecords={handleViewBillRecords}
       />
     );
+  }
+
+  if (currentView === 'bill-records') {
+    return <BillRecords bills={savedBills} onBack={handleBackToAdminPanel} />;
   }
 
   if (currentView === 'service-selection') {
@@ -82,8 +113,10 @@ function App() {
         category={selectedCategory}
         services={services}
         carModels={carModelsList}
-        onBack={handleBackToHome}
+        onBack={handleNavigateHome}
         onViewBill={handleViewBill}
+        billItems={billItems}
+        onServiceToggle={handleServiceToggle}
       />
     );
   }
@@ -91,9 +124,10 @@ function App() {
   if (currentView === 'bill') {
     return (
       <BillView
-        services={selectedServices}
+        billItems={billItems}
         carModel={selectedCarModel}
         onBack={handleBackToServices}
+        onSaveBill={handleSaveBill}
       />
     );
   }

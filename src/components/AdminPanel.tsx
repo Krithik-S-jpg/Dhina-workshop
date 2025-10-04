@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
 import { Service, CarModel } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
@@ -10,9 +10,10 @@ interface AdminPanelProps {
   onBack: () => void;
   onUpdateServices: (services: Service[]) => void;
   onUpdateCarModels: (carModels: CarModel[]) => void;
+  onViewBillRecords: () => void;
 }
 
-export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords }: AdminPanelProps) {
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -171,7 +172,33 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             >
               Car Models Management
             </button>
+             <button
+              onClick={onViewBillRecords}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+            >
+              Bill Management
+            </button>
           </div>
+        </div>
+
+        {/* Bill Management Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <FileText className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold">Bill Management</h3>
+            </div>
+            <button
+              onClick={onViewBillRecords}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+            >
+              <span>View All Bill Records</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-sm text-slate-600 mt-2">
+            View, search, and manage all saved bill records.
+          </p>
         </div>
 
         {/* GST Configuration Section */}
