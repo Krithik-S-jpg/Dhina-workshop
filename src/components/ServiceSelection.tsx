@@ -11,7 +11,7 @@ interface ServiceSelectionProps {
   onBack: () => void;
   onViewBill: (carModel: CarModel) => void;
   billItems: BillItem[];
-  onBillItemChange: (service: Service, quantity: number) => void;
+  onServiceToggle: (service: Service) => void;
 }
 
 const categoryTitles = {
@@ -22,19 +22,19 @@ const categoryTitles = {
   'ac-service': 'A/C Services',
 };
 
-export function ServiceSelection({ category, services, carModels, onBack, onViewBill, billItems, onBillItemChange }: ServiceSelectionProps) {
+export function ServiceSelection({ category, services, carModels, onBack, onViewBill, billItems, onServiceToggle }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
 
   const categoryServices = services.filter(service => service.category === category);
+  const selectedServiceIds = new Set(billItems.map(item => item.service.id));
 
   const handleViewBill = () => {
     onViewBill(selectedCarModel);
   };
 
   const total = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const gstAmount = isGstEnabled ? (total * gstPercentage) / 100 : 0;
+  const gstAmount = (total * gstPercentage) / 100;
   const finalTotal = total + gstAmount;
 
   return (
@@ -61,55 +61,32 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
               </h2>
 
               <div className="space-y-4">
-                {categoryServices.map(service => {
-                  const billItem = billItems.find(item => item.service.id === service.id);
-                  const quantity = billItem ? billItem.quantity : 0;
-                  const isSelected = quantity > 0;
-                  const canIncrease = service.stock === undefined || quantity < service.stock;
-
-                  return (
-                    <div
-                      key={service.id}
-                      className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
-                        isSelected
-                          ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
-                          : 'border-gray-200'
-                      }`}
-                    >
-                      <div className="flex-grow mr-4">
+                {categoryServices.map(service => (
+                  <label
+                    key={service.id}
+                    className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${
+                      selectedServiceIds.has(service.id)
+                        ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedServiceIds.has(service.id)}
+                        onChange={() => onServiceToggle(service)}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                      <div>
                         <span className="font-medium text-slate-800">{service.name}</span>
                         {service.description && (
                           <p className="text-sm text-slate-600">{service.description}</p>
                         )}
-                        {service.stock !== undefined && (
-                          <p className={`text-xs mt-1 ${service.stock - quantity > 0 ? 'text-slate-500' : 'text-red-500'}`}>
-                            {service.stock - quantity > 0 ? `${service.stock - quantity} left in stock` : 'Out of stock'}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="font-bold text-slate-800">₹{service.price}</span>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => onBillItemChange(service, quantity - 1)}
-                            disabled={!isSelected}
-                            className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold"
-                          >
-                            -
-                          </button>
-                          <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
-                          <button
-                            onClick={() => onBillItemChange(service, quantity + 1)}
-                            disabled={!canIncrease}
-                            className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold"
-                          >
-                            +
-                          </button>
-                        </div>
                       </div>
                     </div>
-                  );
-                })}
+                    <span className="font-bold text-slate-800">₹{service.price}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
@@ -154,12 +131,10 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
                         <span className="text-sm text-slate-600">Subtotal:</span>
                         <span className="font-semibold">₹{total.toFixed(2)}</span>
                       </div>
-                      {isGstEnabled && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
-                          <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
+                        <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
+                      </div>
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                         <span className="text-lg font-semibold">Total:</span>
                         <span className="text-2xl font-bold text-blue-600">₹{finalTotal.toFixed(2)}</span>

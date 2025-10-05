@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Edit, Printer, Save } from 'lucide-react';
+import { ArrowLeft, Edit, Download, Save } from 'lucide-react';
 import { BillItem, CarModel, SavedBill } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
@@ -14,7 +14,6 @@ interface BillViewProps {
 
 export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewProps) {
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
   const [customerAddress, setCustomerAddress] = useState('CUSTOMER ADDRESS');
   const [customerPhone, setCustomerPhone] = useState('9000000000');
@@ -22,7 +21,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
   const [isEditing, setIsEditing] = useState(true);
 
   const total = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const gstAmount = isGstEnabled ? (total * gstPercentage) / 100 : 0;
+  const gstAmount = (total * gstPercentage) / 100;
   const netAmount = total + gstAmount;
   const billNumber = `B${Math.random().toString().substr(2, 6).toUpperCase()}`;
   const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -70,7 +69,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="bg-slate-800 text-white shadow-md no-print">
+      <div className="bg-slate-800 text-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button onClick={onBack} className="flex items-center space-x-2 hover:text-blue-300 transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -83,8 +82,8 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
               <span>{isEditing ? 'Lock' : 'Edit'}</span>
             </button>
             <button onClick={() => window.print()} className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center space-x-2">
-              <Printer className="w-5 h-5" />
-              <span>Print Bill</span>
+              <Download className="w-5 h-5" />
+              <span>Download PDF</span>
             </button>
           </div>
         </div>
@@ -129,11 +128,9 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                 <p><span className="font-bold">Bill No:</span> {billNumber}</p>
                 <p><span className="font-bold">Date:</span> {currentDate}</p>
                 <p><span className="font-bold">Vehicle:</span> {carModel.name}</p>
-                {isGstEnabled && (
-                  <p><span className="font-bold">GST No:</span>
-                    {isEditing ? <input type="text" value={gstNumber} onChange={e => setGstNumber(e.target.value)} className="p-1 border border-dashed border-gray-400 rounded" /> : gstNumber}
-                  </p>
-                )}
+                <p><span className="font-bold">GST No:</span>
+                  {isEditing ? <input type="text" value={gstNumber} onChange={e => setGstNumber(e.target.value)} className="p-1 border border-dashed border-gray-400 rounded" /> : gstNumber}
+                </p>
               </div>
             </div>
           </section>
@@ -147,7 +144,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                   <th className="border border-gray-400 p-2">HSN Code</th>
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
-                  {isGstEnabled && <th className="border border-gray-400 p-2">Tax%</th>}
+                  <th className="border border-gray-400 p-2">Tax%</th>
                   <th className="border border-gray-400 p-2">Amount</th>
                 </tr>
               </thead>
@@ -159,7 +156,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                     <td className="border border-gray-400 p-2 text-center">{item.service.hsnCode}</td>
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
-                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{gstPercentage}%</td>}
+                    <td className="border border-gray-400 p-2 text-center">{gstPercentage}%</td>
                     <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))}
@@ -171,7 +168,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
-                    {isGstEnabled && <td className="border border-gray-400 p-2"></td>}
+                    <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
                   </tr>
                 ))}
@@ -192,12 +189,10 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                     <span className="font-bold">Total:</span>
                     <span>{total.toFixed(2)}</span>
                   </div>
-                  {isGstEnabled && (
-                    <div className="flex justify-between">
-                      <span className="font-bold">GST ({gstPercentage}%):</span>
-                      <span>{gstAmount.toFixed(2)}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="font-bold">GST ({gstPercentage}%):</span>
+                    <span>{gstAmount.toFixed(2)}</span>
+                  </div>
                   <div className="flex justify-between font-extrabold text-lg border-t-2 border-b-2 border-gray-800 my-1 py-1">
                     <span>Net Amount:</span>
                     <span>{netAmount.toFixed(2)}</span>
@@ -214,7 +209,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
           </footer>
         </div>
 
-        <div className="max-w-4xl mx-auto mt-6 flex justify-center no-print">
+        <div className="max-w-4xl mx-auto mt-6 flex justify-center">
             <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-12 rounded-lg font-bold text-lg flex items-center space-x-2">
               <Save className="w-6 h-6" />
               <span>Save to Records</span>

@@ -13,9 +13,8 @@ export function AdminLogin({ onBack, onLogin }: AdminLoginProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const storedCreds = JSON.parse(localStorage.getItem('admin-credentials') || '{"username":"admin","password":"admin123"}');
-
-    if (username === storedCreds.username && password === storedCreds.password) {
+    // Simple authentication - in real app, this would be secure
+    if (username === 'admin' && password === 'admin123') {
       onLogin();
     } else {
       setError('Invalid username or password');
