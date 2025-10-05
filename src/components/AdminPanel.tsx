@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
 import { Service, CarModel } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -16,6 +16,11 @@ interface AdminPanelProps {
 export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords }: AdminPanelProps) {
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [editableServices, setEditableServices] = useState<Service[]>(services);
+
+  useEffect(() => {
+    setEditableServices(services);
+  }, [services]);
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isAddingNewCar, setIsAddingNewCar] = useState(false);
@@ -512,8 +517,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         )}
 
         {activeTab === 'inventory' && (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Inventory Levels</h3>
+              <button
+                onClick={() => onUpdateServices(editableServices)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </button>
+            </div>
+            <div className="overflow-x-auto border rounded-lg">
               <table className="w-full">
                 <thead className="bg-slate-50">
                   <tr>
@@ -529,7 +544,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {services.map(service => (
+                  {editableServices.map(service => (
                     <tr key={service.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-slate-900">{service.name}</div>
@@ -544,14 +559,14 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                           type="number"
                           value={service.stock ?? ''}
                           onChange={(e) => {
-                            const updatedServices = services.map(s =>
+                            const updatedServices = editableServices.map(s =>
                               s.id === service.id
                                 ? { ...s, stock: e.target.value === '' ? undefined : Number(e.target.value) }
                                 : s
                             );
-                            onUpdateServices(updatedServices);
+                            setEditableServices(updatedServices);
                           }}
-                          className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-24 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="N/A"
                         />
                       </td>
