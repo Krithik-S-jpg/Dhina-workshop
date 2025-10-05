@@ -25,6 +25,7 @@ const categoryTitles = {
 export function ServiceSelection({ category, services, carModels, onBack, onViewBill, billItems, onServiceToggle }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
+  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
 
   const categoryServices = services.filter(service => service.category === category);
   const selectedServiceIds = new Set(billItems.map(item => item.service.id));
@@ -34,7 +35,7 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
   };
 
   const total = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const gstAmount = (total * gstPercentage) / 100;
+  const gstAmount = isGstEnabled ? (total * gstPercentage) / 100 : 0;
   const finalTotal = total + gstAmount;
 
   return (
@@ -131,10 +132,12 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
                         <span className="text-sm text-slate-600">Subtotal:</span>
                         <span className="font-semibold">₹{total.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
-                        <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
-                      </div>
+                      {isGstEnabled && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
+                          <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                         <span className="text-lg font-semibold">Total:</span>
                         <span className="text-2xl font-bold text-blue-600">₹{finalTotal.toFixed(2)}</span>

@@ -11,9 +11,10 @@ interface AdminPanelProps {
   onUpdateServices: (services: Service[]) => void;
   onUpdateCarModels: (carModels: CarModel[]) => void;
   onViewBillRecords: () => void;
+  onNavigateToSettings: () => void;
 }
 
-export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -183,6 +184,12 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             >
               Bill Management
             </button>
+            <button
+              onClick={onNavigateToSettings}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+            >
+              Settings
+            </button>
           </div>
         </div>
 
@@ -206,31 +213,6 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
           </p>
         </div>
 
-        {/* GST Configuration Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Percent className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">GST Configuration</h3>
-            </div>
-            <div className="flex items-center space-x-3">
-              <label className="text-sm font-medium text-slate-700">GST Percentage:</label>
-              <input
-                type="number"
-                value={gstPercentage}
-                onChange={(e) => setGstPercentage(Number(e.target.value))}
-                className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
-                min="0"
-                max="50"
-                step="0.1"
-              />
-              <span className="text-sm text-slate-600">%</span>
-            </div>
-          </div>
-          <p className="text-sm text-slate-600 mt-2">
-            This GST rate will be applied to all bills. Current rate: {gstPercentage}%
-          </p>
-        </div>
 
         {activeTab === 'services' && isAddingNew && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
