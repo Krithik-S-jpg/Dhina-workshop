@@ -5,12 +5,13 @@ import { ServiceSelection } from './components/ServiceSelection';
 import { BillView } from './components/BillView';
 import { AdminLogin } from './components/AdminLogin';
 import { AdminPanel } from './components/AdminPanel';
+import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Service, CarModel, BillItem, SavedBill } from './types';
 import { carModels, initialServices, defaultGstPercentage } from './data/mockData';
 
-type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records';
+type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records' | 'admin-settings';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -101,6 +102,10 @@ function App() {
     setCurrentView('admin-panel');
   };
 
+  const handleNavigateToSettings = () => {
+    setCurrentView('admin-settings');
+  };
+
   const handleUpdateServices = (updatedServices: Service[]) => {
     setServices(updatedServices);
   };
@@ -122,8 +127,13 @@ function App() {
         onUpdateServices={handleUpdateServices}
         onUpdateCarModels={handleUpdateCarModels}
         onViewBillRecords={handleViewBillRecords}
+        onNavigateToSettings={handleNavigateToSettings}
       />
     );
+  }
+
+  if (currentView === 'admin-settings') {
+    return <AdminSettings onBack={handleBackToAdminPanel} />;
   }
 
   if (currentView === 'bill-records') {
