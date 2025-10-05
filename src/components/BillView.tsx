@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Edit, Download, Save } from 'lucide-react';
+import { ArrowLeft, Edit, Printer } from 'lucide-react';
 import { BillItem, CarModel, SavedBill } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
@@ -49,7 +49,11 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
       netAmount,
     };
     onSaveBill(billToSave);
-    alert('Bill saved successfully!');
+  };
+
+  const handleSaveAndPrint = () => {
+    handleSave();
+    window.print();
   };
 
   const numberToWords = (num: number): string => {
@@ -70,7 +74,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="bg-slate-800 text-white shadow-md">
+      <div className="bg-slate-800 text-white shadow-md no-print">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <button onClick={onBack} className="flex items-center space-x-2 hover:text-blue-300 transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -82,9 +86,9 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
               <Edit className="w-5 h-5" />
               <span>{isEditing ? 'Lock' : 'Edit'}</span>
             </button>
-            <button onClick={() => window.print()} className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center space-x-2">
-              <Download className="w-5 h-5" />
-              <span>Download PDF</span>
+            <button onClick={handleSaveAndPrint} className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center space-x-2">
+              <Printer className="w-5 h-5" />
+              <span>Save & Print</span>
             </button>
           </div>
         </div>
@@ -214,12 +218,6 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
           </footer>
         </div>
 
-        <div className="max-w-4xl mx-auto mt-6 flex justify-center">
-            <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-12 rounded-lg font-bold text-lg flex items-center space-x-2">
-              <Save className="w-6 h-6" />
-              <span>Save to Records</span>
-            </button>
-        </div>
       </div>
       <style jsx global>{`
         @media print {
