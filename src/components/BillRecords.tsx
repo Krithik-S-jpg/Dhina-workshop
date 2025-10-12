@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Search, Calendar, Trash2, Eye } from 'lucide-react';
+import { ArrowLeft, Search, Calendar, Trash2, Eye, Download } from 'lucide-react';
 import { SavedBill } from '../types';
 
 interface BillRecordsProps {
   bills: SavedBill[];
   onBack: () => void;
+  onViewBill: (bill: SavedBill) => void;
+  onDeleteBill: (billNumber: string) => void;
 }
 
-export function BillRecords({ bills, onBack }: BillRecordsProps) {
+export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRecordsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
 
@@ -89,8 +91,19 @@ export function BillRecords({ bills, onBack }: BillRecordsProps) {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.items.map(i => i.description).join(', ')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-right">₹{bill.netAmount.toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 transition-colors"><Eye className="w-5 h-5" /></button>
-                        <button className="text-red-600 hover:text-red-800 transition-colors"><Trash2 className="w-5 h-5" /></button>
+                        <button onClick={() => onViewBill(bill)} className="text-blue-600 hover:text-blue-800 transition-colors" title="View Bill">
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => {
+                          if (confirm('Are you sure you want to delete this bill?')) {
+                            onDeleteBill(bill.billNumber);
+                          }
+                        }} className="text-red-600 hover:text-red-800 transition-colors" title="Delete Bill">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => onViewBill(bill, true)} className="text-green-600 hover:text-green-800 transition-colors" title="Download/Print Bill">
+                          <Download className="w-5 h-5" />
+                        </button>
                       </td>
                     </tr>
                   ))

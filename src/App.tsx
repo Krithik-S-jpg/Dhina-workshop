@@ -7,11 +7,12 @@ import { AdminLogin } from './components/AdminLogin';
 import { AdminPanel } from './components/AdminPanel';
 import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
+import { BillDetails } from './components/BillDetails';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Service, CarModel, BillItem, SavedBill } from './types';
 import { carModels, initialServices, defaultGstPercentage } from './data/mockData';
 
-type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records' | 'admin-settings';
+type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records' | 'admin-settings' | 'bill-details';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -23,6 +24,7 @@ function App() {
   const [carModelsList, setCarModelsList] = useLocalStorage<CarModel[]>('car-models', carModels);
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [savedBills, setSavedBills] = useLocalStorage<SavedBill[]>('car-wash-saved-bills', []);
+  const [billToView, setBillToView] = useState<SavedBill | null>(null);
 
   const handleServiceCardClick = (category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service') => {
     setSelectedCategory(category);
@@ -53,6 +55,18 @@ function App() {
   const handleViewBill = (carModel: CarModel) => {
     setSelectedCarModel(carModel);
     setCurrentView('bill');
+  };
+
+  const handleDeleteBill = (billNumber: string) => {
+    setSavedBills(prevBills => prevBills.filter(b => b.billNumber !== billNumber));
+  };
+
+  const handleViewSavedBill = (bill: SavedBill, print = false) => {
+    setBillToView(bill);
+    setCurrentView('bill-details');
+    if (print) {
+      setTimeout(() => window.print(), 500);
+    }
   };
 
   const handleSaveBill = (bill: SavedBill) => {
@@ -160,7 +174,11 @@ function App() {
   }
 
   if (currentView === 'bill-records') {
-    return <BillRecords bills={savedBills} onBack={handleBackToAdminPanel} />;
+    return <BillRecords bills={savedBills} onBack={handleBackToAdminPanel} onViewBill={handleViewSavedBill} onDeleteBill={handleDeleteBill} />;
+  }
+
+  if (currentView === 'bill-details' && billToView) {
+    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} />;
   }
 
   if (currentView === 'service-selection') {
