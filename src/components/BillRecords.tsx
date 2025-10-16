@@ -18,7 +18,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
     const matchesTerm =
       bill.billNumber.toLowerCase().includes(term) ||
       bill.customerName.toLowerCase().includes(term) ||
-      bill.vehicle.toLowerCase().includes(term);
+      bill.vehicleNumber.toLowerCase().includes(term);
 
     const matchesDate = searchDate ? bill.date === searchDate : true;
 
@@ -45,7 +45,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by bill number, customer name, or vehicle..."
+                placeholder="Search by bill number, customer name, or vehicle number..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -74,7 +74,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Bill Number</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle Number</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Total Amount</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
@@ -87,7 +87,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bill.billNumber}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.date}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.customerName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.vehicle}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.vehicleNumber}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.items.map(i => i.description).join(', ')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-right">₹{bill.netAmount.toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">

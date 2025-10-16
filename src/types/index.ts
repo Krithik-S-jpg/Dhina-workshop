@@ -38,7 +38,7 @@ export interface SavedBill {
   customerName: string;
   customerAddress: string;
   customerPhone: string;
-  vehicle: string;
+  vehicleNumber: string;
   date: string;
   gstNumber: string;
   items: {

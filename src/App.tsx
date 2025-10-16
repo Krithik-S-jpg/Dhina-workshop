@@ -80,7 +80,7 @@ function App() {
   const handleSaveBill = (bill: SavedBill) => {
     // Deduct stock from inventory
     const updatedServices = services.map(service => {
-      const billedItem = billItems.find(item => item.service.id === service.id);
+      const billedItem = bill.items.find(item => item.description === service.name);
       if (billedItem && service.stock !== undefined) {
         return {
           ...service,
@@ -90,6 +90,7 @@ function App() {
       return service;
     });
     setServices(updatedServices);
+    localStorage.setItem('car-wash-services', JSON.stringify(updatedServices));
 
     setSavedBills(prevBills => [...prevBills, bill]);
     setBillItems([]); // Clear current bill

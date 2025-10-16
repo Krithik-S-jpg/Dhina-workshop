@@ -19,6 +19,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
   const [customerAddress, setCustomerAddress] = useState('CUSTOMER ADDRESS');
   const [customerPhone, setCustomerPhone] = useState('9000000000');
+  const [vehicleNumber, setVehicleNumber] = useState('TN-31-0000');
   const [gstNumber, setGstNumber] = useState('GST123456789');
   const [isEditing, setIsEditing] = useState(true);
 
@@ -40,7 +41,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
       customerName,
       customerAddress,
       customerPhone,
-      vehicle: carModel.name,
+      vehicleNumber: vehicleNumber,
       date: currentDate,
       gstNumber,
       items: billItems.map(item => ({
@@ -140,7 +141,9 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
               <div className="w-1/2 pl-4 text-right">
                 <p><span className="font-bold">Bill No:</span> {billNumber}</p>
                 <p><span className="font-bold">Date:</span> {currentDate}</p>
-                <p><span className="font-bold">Vehicle:</span> {carModel.name}</p>
+                <p><span className="font-bold">Vehicle No:</span>
+                  {isEditing ? <input type="text" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} className="p-1 border border-dashed border-gray-400 rounded" data-testid="vehicle-number-input" /> : vehicleNumber}
+                </p>
                 {isGstEnabled && (
                   <p><span className="font-bold">GST No:</span>
                     {isEditing ? <input type="text" value={gstNumber} onChange={e => setGstNumber(e.target.value)} className="p-1 border border-dashed border-gray-400 rounded" /> : gstNumber}
