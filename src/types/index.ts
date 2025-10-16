@@ -6,6 +6,7 @@ export interface Service {
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
   stock?: number;
+  discountPercentage?: number;
 }
 
 export interface CarModel {
@@ -18,6 +19,7 @@ export interface BillItem {
   service: Service;
   quantity: number;
   selected: boolean;
+  discountPercentage?: number;
 }
 
 export interface Bill {
@@ -46,6 +48,7 @@ export interface SavedBill {
     rate: number;
     taxPercentage: number;
     amount: number;
+    discountPercentage?: number;
   }[];
   total: number;
   gstAmount: number;

@@ -10,6 +10,7 @@ interface AdminSettingsProps {
 export function AdminSettings({ onBack }: AdminSettingsProps) {
   const [isGstEnabled, setIsGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
+  const [isDiscountEnabled, setIsDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -99,6 +100,24 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
             )}
           </div>
 
+          {/* Discount Settings */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <Percent className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-slate-800">Discount Configuration</h2>
+            </div>
+            <div className="flex items-center justify-between">
+              <label htmlFor="discount-toggle" className="text-slate-700 font-medium">Enable Discounts</label>
+              <div
+                onClick={() => setIsDiscountEnabled(!isDiscountEnabled)}
+                className={`relative w-14 h-8 flex items-center rounded-full cursor-pointer transition-colors ${isDiscountEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
+                data-testid="discount-toggle"
+              >
+                <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isDiscountEnabled ? 'translate-x-7' : 'translate-x-1'}`}></span>
+              </div>
+            </div>
+          </div>
+
           {/* Password Settings */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center space-x-3 mb-4">
@@ -117,6 +136,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter current password"
                   required
+                  data-testid="current-password-input"
                 />
               </div>
               <div>
@@ -130,6 +150,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter new password"
                   required
+                  data-testid="new-password-input"
                 />
               </div>
               <div>
@@ -143,6 +164,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Confirm new password"
                   required
+                  data-testid="confirm-password-input"
                 />
               </div>
 
@@ -160,6 +182,7 @@ export function AdminSettings({ onBack }: AdminSettingsProps) {
               <button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+  data-testid="update-password-button"
               >
                 Update Password
               </button>

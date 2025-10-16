@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ServiceCard } from './components/ServiceCard';
 import { ServiceSelection } from './components/ServiceSelection';
@@ -26,6 +26,14 @@ function App() {
   const [savedBills, setSavedBills] = useLocalStorage<SavedBill[]>('car-wash-saved-bills', []);
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
 
+  useEffect(() => {
+    const migratedServices = services.map(s => ({
+      ...s,
+      stock: s.stock ?? 100, // Assign a default stock of 100 if it's missing
+    }));
+    setServices(migratedServices);
+  }, []);
+
   const handleServiceCardClick = (category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service') => {
     setSelectedCategory(category);
     setCurrentView('service-selection');
@@ -47,7 +55,7 @@ function App() {
         );
       } else {
         // Add new item if it doesn't exist
-        return [...prevItems, { service, quantity, selected: true }];
+        return [...prevItems, { service, quantity, selected: true, discountPercentage: service.discountPercentage }];
       }
     });
   };
@@ -232,6 +240,7 @@ function App() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-3 rounded-full border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+            data-testid="service-search-input"
           />
         </div>
 

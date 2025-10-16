@@ -15,15 +15,22 @@ interface BillViewProps {
 export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewProps) {
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
+  const [isDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
   const [customerAddress, setCustomerAddress] = useState('CUSTOMER ADDRESS');
   const [customerPhone, setCustomerPhone] = useState('9000000000');
   const [gstNumber, setGstNumber] = useState('GST123456789');
   const [isEditing, setIsEditing] = useState(true);
 
-  const total = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const gstAmount = isGstEnabled ? (total * gstPercentage) / 100 : 0;
-  const netAmount = total + gstAmount;
+  const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
+  const totalDiscount = isDiscountEnabled ? billItems.reduce((sum, item) => {
+    const discount = (item.discountPercentage ?? 0) / 100;
+    return sum + (item.service.price * item.quantity * discount);
+  }, 0) : 0;
+  const totalAfterDiscount = subtotal - totalDiscount;
+  const gstAmount = isGstEnabled ? (totalAfterDiscount * gstPercentage) / 100 : 0;
+  const netAmount = totalAfterDiscount + gstAmount;
+
   const billNumber = `B${Math.random().toString().substr(2, 6).toUpperCase()}`;
   const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -43,8 +50,9 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
         rate: item.service.price,
         taxPercentage: gstPercentage,
         amount: item.service.price * item.quantity,
+        discountPercentage: item.discountPercentage,
       })),
-      total,
+      total: subtotal,
       gstAmount,
       netAmount,
     };
@@ -151,6 +159,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                   <th className="border border-gray-400 p-2">HSN Code</th>
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
+                  {isDiscountEnabled && <th className="border border-gray-400 p-2">Discount</th>}
                   {isGstEnabled && <th className="border border-gray-400 p-2">Tax%</th>}
                   <th className="border border-gray-400 p-2">Amount</th>
                 </tr>
@@ -163,6 +172,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                     <td className="border border-gray-400 p-2 text-center">{item.service.hsnCode}</td>
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
+                    {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}
                     {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{gstPercentage}%</td>}
                     <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
                   </tr>
@@ -175,6 +185,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
+                    {isDiscountEnabled && <td className="border border-gray-400 p-2"></td>}
                     {isGstEnabled && <td className="border border-gray-400 p-2"></td>}
                     <td className="border border-gray-400 p-2"></td>
                   </tr>
@@ -193,9 +204,15 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
               <div className="w-1/3">
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span className="font-bold">Total:</span>
-                    <span>{total.toFixed(2)}</span>
+                    <span className="font-bold">Subtotal:</span>
+                    <span>{subtotal.toFixed(2)}</span>
                   </div>
+                  {isDiscountEnabled && totalDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span className="font-bold">Discount:</span>
+                      <span>- {totalDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   {isGstEnabled && (
                     <div className="flex justify-between">
                       <span className="font-bold">GST ({gstPercentage}%):</span>

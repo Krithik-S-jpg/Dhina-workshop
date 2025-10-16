@@ -22,6 +22,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
   const [isAddingNewCar, setIsAddingNewCar] = useState(false);
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     setEditableServices(services);
@@ -53,6 +54,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         s.id === editingService.id ? editingService : s
       );
       onUpdateServices(updatedServices);
+      setEditableServices(updatedServices);
       setEditingService(null);
     }
   };
@@ -202,6 +204,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             <button
               onClick={onNavigateToSettings}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+              data-testid="settings-button"
             >
               Settings
             </button>
@@ -285,6 +288,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                   placeholder="Enter description"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Discount (%)
+                </label>
+                <input
+                  type="number"
+                  value={newService.discountPercentage ?? ''}
+                  onChange={(e) => setNewService({ ...newService, discountPercentage: e.target.value === '' ? undefined : Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 10"
+                />
+              </div>
             </div>
             <div className="flex space-x-2 mt-4">
               <button
@@ -362,6 +377,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                 value={adminSearchQuery}
                 onChange={(e) => setAdminSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                data-testid="admin-service-search-input"
               />
             </div>
             <div className="overflow-x-auto border rounded-lg">
@@ -379,6 +395,9 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                       Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Discount (%)
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                       Actions
@@ -443,6 +462,19 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                           <div className="text-sm text-slate-600">{service.description}</div>
                         )}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingService?.id === service.id ? (
+                          <input
+                            type="number"
+                            value={editingService.discountPercentage ?? ''}
+                            onChange={(e) => setEditingService({ ...editingService, discountPercentage: e.target.value === '' ? undefined : Number(e.target.value) })}
+                            className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="N/A"
+                          />
+                        ) : (
+                          <div className="text-sm text-slate-900">{service.discountPercentage ?? 'N/A'}%</div>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {editingService?.id === service.id ? (
                           <div className="flex space-x-2">
@@ -489,13 +521,22 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Inventory Levels</h3>
               <button
-                onClick={() => onUpdateServices(editableServices)}
+                onClick={() => {
+                  onUpdateServices(editableServices);
+                  setSuccessMessage('Stock updated successfully!');
+                  setTimeout(() => setSuccessMessage(''), 3000);
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>
             </div>
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                {successMessage}
+              </div>
+            )}
             <div className="overflow-x-auto border rounded-lg">
               <table className="w-full">
                 <thead className="bg-slate-50">

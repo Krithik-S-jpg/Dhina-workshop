@@ -26,6 +26,7 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
+  const [isDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
 
   const categoryServices = services.filter(service => service.category === category);
 
@@ -33,9 +34,14 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
     onViewBill(selectedCarModel);
   };
 
-  const total = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const gstAmount = isGstEnabled ? (total * gstPercentage) / 100 : 0;
-  const finalTotal = total + gstAmount;
+  const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
+  const totalDiscount = billItems.reduce((sum, item) => {
+    const discount = (item.discountPercentage ?? 0) / 100;
+    return sum + (item.service.price * item.quantity * discount);
+  }, 0);
+  const totalAfterDiscount = subtotal - totalDiscount;
+  const gstAmount = isGstEnabled ? (totalAfterDiscount * gstPercentage) / 100 : 0;
+  const finalTotal = totalAfterDiscount + gstAmount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,6 +87,9 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
                         {service.description && (
                           <p className="text-sm text-slate-600">{service.description}</p>
                         )}
+                        {isDiscountEnabled && service.discountPercentage && (
+                          <p className="text-xs text-green-600 font-semibold mt-1">{service.discountPercentage}% off</p>
+                        )}
                         {service.stock !== undefined && (
                           <p className={`text-xs mt-1 ${service.stock - quantity > 0 ? 'text-slate-500' : 'text-red-500'}`}>
                             {service.stock - quantity > 0 ? `${service.stock - quantity} left in stock` : 'Out of stock'}
@@ -97,7 +106,7 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
                           >
                             -
                           </button>
-                          <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
+                          <span className="text-lg font-semibold w-8 text-center" data-testid={`quantity-${service.id}`}>{quantity}</span>
                           <button
                             onClick={() => onBillItemChange(service, quantity + 1)}
                             disabled={!canIncrease}
@@ -152,8 +161,14 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-600">Subtotal:</span>
-                        <span className="font-semibold">₹{total.toFixed(2)}</span>
+                        <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
                       </div>
+                      {isDiscountEnabled && totalDiscount > 0 && (
+                        <div className="flex justify-between items-center text-green-600">
+                          <span className="text-sm">Discount:</span>
+                          <span className="font-semibold">- ₹{totalDiscount.toFixed(2)}</span>
+                        </div>
+                      )}
                       {isGstEnabled && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
