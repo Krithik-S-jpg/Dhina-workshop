@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Service, CarModel } from '../types';
+import { Service, CarModel, BillItem } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
 
@@ -9,7 +9,9 @@ interface ServiceSelectionProps {
   services: Service[];
   carModels: CarModel[];
   onBack: () => void;
-  onViewBill: (selectedServices: Service[], carModel: CarModel) => void;
+  onViewBill: (carModel: CarModel) => void;
+  billItems: BillItem[];
+  onBillItemChange: (service: Service, quantity: number) => void;
 }
 
 const categoryTitles = {
@@ -20,34 +22,26 @@ const categoryTitles = {
   'ac-service': 'A/C Services',
 };
 
-export function ServiceSelection({ category, services, carModels, onBack, onViewBill }: ServiceSelectionProps) {
+export function ServiceSelection({ category, services, carModels, onBack, onViewBill, billItems, onBillItemChange }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
-  const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
+  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
+  const [isDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
 
   const categoryServices = services.filter(service => service.category === category);
 
-  const handleServiceToggle = (serviceId: string) => {
-    const newSelected = new Set(selectedServices);
-    if (newSelected.has(serviceId)) {
-      newSelected.delete(serviceId);
-    } else {
-      newSelected.add(serviceId);
-    }
-    setSelectedServices(newSelected);
-  };
-
   const handleViewBill = () => {
-    const selected = categoryServices.filter(service => selectedServices.has(service.id));
-    onViewBill(selected, selectedCarModel);
+    onViewBill(selectedCarModel);
   };
 
-  const total = categoryServices
-    .filter(service => selectedServices.has(service.id))
-    .reduce((sum, service) => sum + service.price, 0);
-  
-  const gstAmount = (total * gstPercentage) / 100;
-  const finalTotal = total + gstAmount;
+  const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
+  const totalDiscount = billItems.reduce((sum, item) => {
+    const discount = (item.discountPercentage ?? 0) / 100;
+    return sum + (item.service.price * item.quantity * discount);
+  }, 0);
+  const totalAfterDiscount = subtotal - totalDiscount;
+  const gstAmount = isGstEnabled ? (totalAfterDiscount * gstPercentage) / 100 : 0;
+  const finalTotal = totalAfterDiscount + gstAmount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,89 +52,150 @@ export function ServiceSelection({ category, services, carModels, onBack, onView
             className="flex items-center space-x-2 mb-4 hover:text-blue-300 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Services</span>
+            <span>Back to Home</span>
           </button>
-          <h1 className="text-3xl font-bold text-center">Car Wash Company</h1>
+          <h1 className="text-3xl font-bold text-center">Select Services</h1>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-8 text-center">
-            <label className="block text-lg font-medium text-slate-700 mb-2">
-              Select Car Model:
-            </label>
-            <select
-              value={selectedCarModel.id}
-              onChange={(e) => {
-                const model = carModels.find(m => m.id === e.target.value);
-                if (model) setSelectedCarModel(model);
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {carModels.map(model => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))}
-            </select>
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">
+                {categoryTitles[category]}
+              </h2>
+
+              <div className="space-y-4">
+                {categoryServices.map(service => {
+                  const billItem = billItems.find(item => item.service.id === service.id);
+                  const quantity = billItem ? billItem.quantity : 0;
+                  const isSelected = quantity > 0;
+                  const canIncrease = service.stock === undefined || quantity < service.stock;
+
+                  return (
+                    <div
+                      key={service.id}
+                      className={`flex items-center justify-between p-4 border rounded-lg transition-all ${
+                        isSelected
+                          ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <div className="flex-grow mr-4">
+                        <span className="font-medium text-slate-800">{service.name}</span>
+                        {service.description && (
+                          <p className="text-sm text-slate-600">{service.description}</p>
+                        )}
+                        {isDiscountEnabled && service.discountPercentage && (
+                          <p className="text-xs text-green-600 font-semibold mt-1">{service.discountPercentage}% off</p>
+                        )}
+                        {service.stock !== undefined && (
+                          <p className={`text-xs mt-1 ${service.stock - quantity > 0 ? 'text-slate-500' : 'text-red-500'}`}>
+                            {service.stock - quantity > 0 ? `${service.stock - quantity} left in stock` : 'Out of stock'}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="font-bold text-slate-800">₹{service.price}</span>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => onBillItemChange(service, quantity - 1)}
+                            disabled={!isSelected}
+                            className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="text-lg font-semibold w-8 text-center" data-testid={`quantity-${service.id}`}>{quantity}</span>
+                          <button
+                            onClick={() => onBillItemChange(service, quantity + 1)}
+                            disabled={!canIncrease}
+                            className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">
-              {categoryTitles[category]}
-            </h2>
-
-            <div className="space-y-4">
-              {categoryServices.map(service => (
-                <label
-                  key={service.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.has(service.id)}
-                      onChange={() => handleServiceToggle(service.id)}
-                      className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <div>
-                      <span className="font-medium text-slate-800">{service.name}</span>
-                      {service.description && (
-                        <p className="text-sm text-slate-600">{service.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  <span className="font-bold text-slate-800">₹{service.price}</span>
+          <div className="md:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+              <h3 className="text-xl font-bold text-slate-800 mb-4">Your Bill</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Car Model:
                 </label>
-              ))}
-            </div>
-
-            {selectedServices.size > 0 && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">Subtotal:</span>
-                    <span className="font-semibold">₹{total}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
-                    <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                    <span className="text-lg font-semibold">Total:</span>
-                    <span className="text-2xl font-bold text-blue-600">₹{finalTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleViewBill}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                <select
+                  value={selectedCarModel.id}
+                  onChange={(e) => {
+                    const model = carModels.find(m => m.id === e.target.value);
+                    if (model) setSelectedCarModel(model);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>View Overall Bill</span>
-                </button>
+                  {carModels.map(model => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
+
+              {billItems.length > 0 ? (
+                <>
+                  <div className="space-y-3 mb-4">
+                    {billItems.map(item => (
+                      <div key={item.service.id} className="flex justify-between items-center text-sm">
+                        <span className="text-slate-700">{item.service.name}</span>
+                        <span className="font-semibold">₹{item.service.price * item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Subtotal:</span>
+                        <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
+                      </div>
+                      {isDiscountEnabled && totalDiscount > 0 && (
+                        <div className="flex justify-between items-center text-green-600">
+                          <span className="text-sm">Discount:</span>
+                          <span className="font-semibold">- ₹{totalDiscount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {isGstEnabled && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
+                          <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span className="text-lg font-semibold">Total:</span>
+                        <span className="text-2xl font-bold text-blue-600">₹{finalTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleViewBill}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      <span>Proceed to Bill</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <ShoppingCart className="w-12 h-12 mx-auto text-gray-300" />
+                  <p className="mt-2 text-sm text-slate-600">No services selected</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

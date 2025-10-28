@@ -13,8 +13,9 @@ export function AdminLogin({ onBack, onLogin }: AdminLoginProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple authentication - in real app, this would be secure
-    if (username === 'admin' && password === 'admin123') {
+    const storedCreds = JSON.parse(localStorage.getItem('admin-credentials') || '{"username":"admin","password":"admin123"}');
+
+    if (username === storedCreds.username && password === storedCreds.password) {
       onLogin();
     } else {
       setError('Invalid username or password');
@@ -59,6 +60,7 @@ export function AdminLogin({ onBack, onLogin }: AdminLoginProps) {
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter username"
                     required
+                    data-testid="username-input"
                   />
                 </div>
               </div>
@@ -76,6 +78,7 @@ export function AdminLogin({ onBack, onLogin }: AdminLoginProps) {
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter password"
                     required
+                    data-testid="password-input"
                   />
                 </div>
               </div>

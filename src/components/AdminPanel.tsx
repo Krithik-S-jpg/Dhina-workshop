@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
 import { Service, CarModel } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
@@ -10,15 +10,23 @@ interface AdminPanelProps {
   onBack: () => void;
   onUpdateServices: (services: Service[]) => void;
   onUpdateCarModels: (carModels: CarModel[]) => void;
+  onViewBillRecords: () => void;
+  onNavigateToSettings: () => void;
 }
 
-export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isAddingNewCar, setIsAddingNewCar] = useState(false);
-  const [activeTab, setActiveTab] = useState<'services' | 'cars'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory'>('services');
+  const [editableServices, setEditableServices] = useState<Service[]>(services);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    setEditableServices(services);
+  }, [services]);
   const [newService, setNewService] = useState<Partial<Service>>({
     name: '',
     price: 0,
@@ -29,6 +37,11 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
     name: '',
     brand: '',
   });
+  const [adminSearchQuery, setAdminSearchQuery] = useState('');
+
+  const filteredServices = services.filter(service =>
+    service.name.toLowerCase().includes(adminSearchQuery.toLowerCase())
+  );
 
   const handleEdit = (service: Service) => {
     setEditingService({ ...service });
@@ -41,6 +54,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         s.id === editingService.id ? editingService : s
       );
       onUpdateServices(updatedServices);
+      setEditableServices(updatedServices);
       setEditingService(null);
     }
   };
@@ -171,34 +185,52 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             >
               Car Models Management
             </button>
+             <button
+              onClick={onViewBillRecords}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+            >
+              Bill Management
+            </button>
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'inventory'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Inventory Management
+            </button>
+            <button
+              onClick={onNavigateToSettings}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+              data-testid="settings-button"
+            >
+              Settings
+            </button>
           </div>
         </div>
 
-        {/* GST Configuration Section */}
+        {/* Bill Management Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Percent className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">GST Configuration</h3>
+              <FileText className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold">Bill Management</h3>
             </div>
-            <div className="flex items-center space-x-3">
-              <label className="text-sm font-medium text-slate-700">GST Percentage:</label>
-              <input
-                type="number"
-                value={gstPercentage}
-                onChange={(e) => setGstPercentage(Number(e.target.value))}
-                className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
-                min="0"
-                max="50"
-                step="0.1"
-              />
-              <span className="text-sm text-slate-600">%</span>
-            </div>
+            <button
+              onClick={onViewBillRecords}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+            >
+              <span>View All Bill Records</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
           <p className="text-sm text-slate-600 mt-2">
-            This GST rate will be applied to all bills. Current rate: {gstPercentage}%
+            View, search, and manage all saved bill records.
           </p>
         </div>
+
 
         {activeTab === 'services' && isAddingNew && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -254,6 +286,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                   onChange={(e) => setNewService({ ...newService, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter description"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Discount (%)
+                </label>
+                <input
+                  type="number"
+                  value={newService.discountPercentage ?? ''}
+                  onChange={(e) => setNewService({ ...newService, discountPercentage: e.target.value === '' ? undefined : Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 10"
                 />
               </div>
             </div>
@@ -325,8 +369,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         )}
 
         {activeTab === 'services' && (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search services by name..."
+                value={adminSearchQuery}
+                onChange={(e) => setAdminSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                data-testid="admin-service-search-input"
+              />
+            </div>
+            <div className="overflow-x-auto border rounded-lg">
               <table className="w-full">
                 <thead className="bg-slate-50">
                   <tr>
@@ -343,12 +397,15 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                       Description
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Discount (%)
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {services.map(service => (
+                  {filteredServices.map(service => (
                     <tr key={service.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {editingService?.id === service.id ? (
@@ -405,6 +462,19 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                           <div className="text-sm text-slate-600">{service.description}</div>
                         )}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingService?.id === service.id ? (
+                          <input
+                            type="number"
+                            value={editingService.discountPercentage ?? ''}
+                            onChange={(e) => setEditingService({ ...editingService, discountPercentage: e.target.value === '' ? undefined : Number(e.target.value) })}
+                            className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="N/A"
+                          />
+                        ) : (
+                          <div className="text-sm text-slate-900">{service.discountPercentage ?? 'N/A'}%</div>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {editingService?.id === service.id ? (
                           <div className="flex space-x-2">
@@ -437,6 +507,77 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                             </button>
                           </div>
                         )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'inventory' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Inventory Levels</h3>
+              <button
+                onClick={() => {
+                  onUpdateServices(editableServices);
+                  setSuccessMessage('Stock updated successfully!');
+                  setTimeout(() => setSuccessMessage(''), 3000);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </button>
+            </div>
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                {successMessage}
+              </div>
+            )}
+            <div className="overflow-x-auto border rounded-lg">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Service Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Stock Level
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {editableServices.map(service => (
+                    <tr key={service.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-slate-900">{service.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {categoryOptions.find(opt => opt.value === service.category)?.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="number"
+                          value={service.stock ?? ''}
+                          onChange={(e) => {
+                            const updatedServices = editableServices.map(s =>
+                              s.id === service.id
+                                ? { ...s, stock: e.target.value === '' ? undefined : Number(e.target.value) }
+                                : s
+                            );
+                            setEditableServices(updatedServices);
+                          }}
+                          className="w-24 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="N/A"
+                        />
                       </td>
                     </tr>
                   ))}
