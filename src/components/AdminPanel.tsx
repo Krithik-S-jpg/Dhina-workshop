@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
 import { Service, CarModel } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
+import { ServiceManagementCard } from './ServiceManagementCard';
 
 interface AdminPanelProps {
   services: Service[];
@@ -10,9 +11,10 @@ interface AdminPanelProps {
   onBack: () => void;
   onUpdateServices: (services: Service[]) => void;
   onUpdateCarModels: (carModels: CarModel[]) => void;
+  onViewBillRecords: () => void;
 }
 
-export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords }: AdminPanelProps) {
   const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -171,7 +173,33 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             >
               Car Models Management
             </button>
+             <button
+              onClick={onViewBillRecords}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
+            >
+              Bill Management
+            </button>
           </div>
+        </div>
+
+        {/* Bill Management Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <FileText className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold">Bill Management</h3>
+            </div>
+            <button
+              onClick={onViewBillRecords}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+            >
+              <span>View All Bill Records</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-sm text-slate-600 mt-2">
+            View, search, and manage all saved bill records.
+          </p>
         </div>
 
         {/* GST Configuration Section */}
@@ -325,123 +353,73 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         )}
 
         {activeTab === 'services' && (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Service Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {services.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="text"
-                            value={editingService.name}
-                            onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm font-medium text-slate-900">{service.name}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <select
-                            value={editingService.category}
-                            onChange={(e) => setEditingService({ ...editingService, category: e.target.value as Service['category'] })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          >
-                            {categoryOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                            {categoryOptions.find(opt => opt.value === service.category)?.label}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="number"
-                            value={editingService.price}
-                            onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm text-slate-900 font-semibold">₹{service.price}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="text"
-                            value={editingService.description || ''}
-                            onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm text-slate-600">{service.description}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {editingService?.id === service.id ? (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={handleSave}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditingService(null)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEdit(service)}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(service.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {services.map(service => (
+              <ServiceManagementCard
+                key={service.id}
+                service={service}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+
+        {editingService && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg">
+              <h3 className="text-lg font-semibold mb-4">Edit Service</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Service Name</label>
+                  <input
+                    type="text"
+                    value={editingService.name}
+                    onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Price (₹)</label>
+                  <input
+                    type="number"
+                    value={editingService.price}
+                    onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                  <select
+                    value={editingService.category}
+                    onChange={(e) => setEditingService({ ...editingService, category: e.target.value as Service['category'] })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {categoryOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                  <input
+                    type="text"
+                    value={editingService.description || ''}
+                    onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-2 mt-4">
+                <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
+                  <Save className="w-4 h-4" />
+                  <span>Save</span>
+                </button>
+                <button onClick={() => setEditingService(null)} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
+                  <X className="w-4 h-4" />
+                  <span>Cancel</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
