@@ -4,6 +4,7 @@ export interface Service {
   price: number;
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
+  image: string;
 }
 
 export interface CarModel {

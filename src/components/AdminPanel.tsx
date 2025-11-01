@@ -24,6 +24,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
     price: 0,
     category: 'water-service',
     description: '',
+    image: '',
   });
   const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
     name: '',
@@ -60,9 +61,10 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         price: newService.price,
         category: newService.category as Service['category'],
         description: newService.description,
+        image: newService.image,
       };
       onUpdateServices([...services, service]);
-      setNewService({ name: '', price: 0, category: 'water-service', description: '' });
+      setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '' });
       setIsAddingNew(false);
     }
   };
@@ -256,6 +258,18 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
                   placeholder="Enter description"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  value={newService.image}
+                  onChange={(e) => setNewService({ ...newService, image: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter image URL"
+                />
+              </div>
             </div>
             <div className="flex space-x-2 mt-4">
               <button
@@ -325,124 +339,87 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
         )}
 
         {activeTab === 'services' && (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Service Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {services.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="text"
-                            value={editingService.name}
-                            onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm font-medium text-slate-900">{service.name}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <select
-                            value={editingService.category}
-                            onChange={(e) => setEditingService({ ...editingService, category: e.target.value as Service['category'] })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          >
-                            {categoryOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                            {categoryOptions.find(opt => opt.value === service.category)?.label}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="number"
-                            value={editingService.price}
-                            onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm text-slate-900 font-semibold">₹{service.price}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {editingService?.id === service.id ? (
-                          <input
-                            type="text"
-                            value={editingService.description || ''}
-                            onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          />
-                        ) : (
-                          <div className="text-sm text-slate-600">{service.description}</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {editingService?.id === service.id ? (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={handleSave}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditingService(null)}
-                              className="text-gray-600 hover:text-gray-900"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEdit(service)}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(service.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {services.map(service => (
+              <div key={service.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                {editingService?.id === service.id ? (
+                  <div className="p-4">
+                    <input
+                      type="text"
+                      value={editingService.name}
+                      onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
+                      className="w-full px-2 py-1 border border-gray-300 rounded mb-2"
+                    />
+                    <input
+                      type="number"
+                      value={editingService.price}
+                      onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
+                      className="w-full px-2 py-1 border border-gray-300 rounded mb-2"
+                    />
+                    <textarea
+                      value={editingService.description}
+                      onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
+                      className="w-full px-2 py-1 border border-gray-300 rounded mb-2"
+                    />
+                    <input
+                      type="text"
+                      value={editingService.image}
+                      onChange={(e) => setEditingService({ ...editingService, image: e.target.value })}
+                      className="w-full px-2 py-1 border border-gray-300 rounded mb-2"
+                    />
+                    <select
+                      value={editingService.category}
+                      onChange={(e) => setEditingService({ ...editingService, category: e.target.value as Service['category'] })}
+                      className="w-full px-2 py-1 border border-gray-300 rounded mb-2"
+                    >
+                      {categoryOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={handleSave} className="text-green-600 hover:text-green-900">
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setEditingService(null)} className="text-gray-600 hover:text-gray-900">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-slate-800">{service.name}</h3>
+                      <p className="text-sm text-slate-600">{service.description}</p>
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {categoryOptions.find(opt => opt.value === service.category)?.label}
+                      </span>
+                      <div className="mt-2 text-lg font-bold text-blue-600">₹{service.price}</div>
+                      <div className="mt-4 flex justify-end space-x-2">
+                        <button
+                          onClick={() => handleEdit(service)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(service.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
