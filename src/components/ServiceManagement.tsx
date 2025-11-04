@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, ArrowLeft } from 'lucide-react';
 import { Service } from '../types';
 import { ServiceCard } from './ServiceCard';
+import { serviceCategories } from '../data/mockData';
 
 interface ServiceManagementProps {
   services: Service[];
@@ -17,12 +18,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     category: 'water-service',
     description: '',
     image: '',
+    hsnCode: '',
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
-
-  const filteredServices = services.filter(service =>
-    service.name.toLowerCase().includes(adminSearchQuery.toLowerCase())
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handleEdit = (service: Service) => {
     setEditingService({ ...service });
@@ -55,10 +54,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
         category: newService.category as Service['category'],
         description: newService.description,
         image: newService.image,
-        hsnCode: '',
+        hsnCode: newService.hsnCode || '',
       };
       onUpdateServices([...services, service]);
-      setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '' });
+      setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsnCode: '' });
       setIsAddingNew(false);
     }
   };
@@ -71,10 +70,40 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     { value: 'ac-service', label: 'A/C Service' },
   ];
 
+  const filteredServices = services.filter(service =>
+    service.category === selectedCategory &&
+    service.name.toLowerCase().includes(adminSearchQuery.toLowerCase())
+  );
+
+  if (!selectedCategory) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Select a Category</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {serviceCategories.map(category => (
+            <ServiceCard
+              key={category.category}
+              title={category.title}
+              image={category.image}
+              category={category.category}
+              onClick={() => setSelectedCategory(category.category)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Service Management</h2>
+        <button
+          onClick={() => setSelectedCategory(null)}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Categories</span>
+        </button>
         <button
           onClick={() => setIsAddingNew(true)}
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
@@ -105,6 +134,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             </select>
             <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" placeholder="HSN Code" value={newService.hsnCode} onChange={(e) => setNewService({ ...newService, hsnCode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -152,6 +182,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               </select>
               <input type="text" placeholder="Description" value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="text" placeholder="HSN Code" value={editingService.hsnCode} onChange={(e) => setEditingService({ ...editingService, hsnCode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>

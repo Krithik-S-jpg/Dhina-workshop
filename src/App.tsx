@@ -10,7 +10,7 @@ import { BillRecords } from './components/BillRecords';
 import { BillDetails } from './components/BillDetails';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Service, CarModel, BillItem, SavedBill } from './types';
-import { carModels, initialServices, defaultGstPercentage } from './data/mockData';
+import { carModels, initialServices, defaultGstPercentage, serviceCategories } from './data/mockData';
 
 type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records' | 'admin-settings' | 'bill-details';
 
@@ -137,14 +137,6 @@ function App() {
   const handleUpdateCarModels = (updatedCarModels: CarModel[]) => {
     setCarModelsList(updatedCarModels);
   };
-
-  const serviceCategories = [
-    { title: 'Wheel Alignment', image: 'https://images.pexels.com/photos/3806288/pexels-photo-3806288.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'wheel-alignment' as const },
-    { title: 'Water Service', image: 'https://images.pexels.com/photos/13065690/pexels-photo-13065690.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'water-service' as const },
-    { title: 'Car Accessories', image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'car-accessories' as const },
-    { title: 'CNG/LPG Service', image: 'https://images.pexels.com/photos/4489702/pexels-photo-4489702.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'cng-lpg' as const },
-    { title: 'A/C Service', image: 'https://images.pexels.com/photos/3807277/pexels-photo-3807277.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'ac-service' as const },
-  ];
 
   const filteredServiceCategories = serviceCategories.filter(cat => {
     if (!searchQuery) {
