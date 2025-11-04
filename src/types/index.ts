@@ -2,6 +2,7 @@ export interface Service {
   id: string;
   name: string;
   price: number;
+  image: string;
   hsnCode: string;
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
