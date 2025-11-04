@@ -16,71 +16,19 @@ interface AdminPanelProps {
 }
 
 export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
-  const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [isAddingNewCar, setIsAddingNewCar] = useState(false);
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
+  const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
+  const [isAddingNewCar, setIsAddingNewCar] = useState(false);
+    const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
+    name: '',
+    brand: '',
+  });
 
   useEffect(() => {
     setEditableServices(services);
   }, [services]);
-  const [newService, setNewService] = useState<Partial<Service>>({
-    name: '',
-    price: 0,
-    category: 'water-service',
-    description: '',
-  });
-  const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
-    name: '',
-    brand: '',
-  });
-  const [adminSearchQuery, setAdminSearchQuery] = useState('');
-
-  const filteredServices = services.filter(service =>
-    service.name.toLowerCase().includes(adminSearchQuery.toLowerCase())
-  );
-
-  const handleEdit = (service: Service) => {
-    setEditingService({ ...service });
-    setIsAddingNew(false);
-  };
-
-  const handleSave = () => {
-    if (editingService) {
-      const updatedServices = services.map(s => 
-        s.id === editingService.id ? editingService : s
-      );
-      onUpdateServices(updatedServices);
-      setEditableServices(updatedServices);
-      setEditingService(null);
-    }
-  };
-
-  const handleDelete = (serviceId: string) => {
-    if (confirm('Are you sure you want to delete this service?')) {
-      const updatedServices = services.filter(s => s.id !== serviceId);
-      onUpdateServices(updatedServices);
-    }
-  };
-
-  const handleAddNew = () => {
-    if (newService.name && newService.price) {
-      const service: Service = {
-        id: Date.now().toString(),
-        name: newService.name,
-        price: newService.price,
-        category: newService.category as Service['category'],
-        description: newService.description,
-      };
-      onUpdateServices([...services, service]);
-      setNewService({ name: '', price: 0, category: 'water-service', description: '' });
-      setIsAddingNew(false);
-    }
-  };
 
   const handleEditCar = (carModel: CarModel) => {
     setEditingCarModel({ ...carModel });
@@ -89,7 +37,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
 
   const handleSaveCar = () => {
     if (editingCarModel) {
-      const updatedCarModels = carModels.map(c => 
+      const updatedCarModels = carModels.map(c =>
         c.id === editingCarModel.id ? editingCarModel : c
       );
       onUpdateCarModels(updatedCarModels);
@@ -117,7 +65,7 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
     }
   };
 
-  const categoryOptions = [
+    const categoryOptions = [
     { value: 'water-service', label: 'Water Service' },
     { value: 'wheel-alignment', label: 'Wheel Alignment' },
     { value: 'car-accessories', label: 'Car Accessories' },
@@ -138,26 +86,6 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
           </button>
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Admin Panel - Management</h1>
-            <div className="flex space-x-2">
-              {activeTab === 'services' && (
-                <button
-                  onClick={() => setIsAddingNew(true)}
-                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Service</span>
-                </button>
-              )}
-              {activeTab === 'cars' && (
-                <button
-                  onClick={() => setIsAddingNewCar(true)}
-                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Car Model</span>
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -231,143 +159,6 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
             View, search, and manage all saved bill records.
           </p>
         </div>
-
-
-        {activeTab === 'services' && isAddingNew && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Add New Service</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Service Name
-                </label>
-                <input
-                  type="text"
-                  value={newService.name}
-                  onChange={(e) => setNewService({ ...newService, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter service name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Price (₹)
-                </label>
-                <input
-                  type="number"
-                  value={newService.price}
-                  onChange={(e) => setNewService({ ...newService, price: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter price"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Category
-                </label>
-                <select
-                  value={newService.category}
-                  onChange={(e) => setNewService({ ...newService, category: e.target.value as Service['category'] })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {categoryOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={newService.description}
-                  onChange={(e) => setNewService({ ...newService, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter description"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Discount (%)
-                </label>
-                <input
-                  type="number"
-                  value={newService.discountPercentage ?? ''}
-                  onChange={(e) => setNewService({ ...newService, discountPercentage: e.target.value === '' ? undefined : Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 10"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-2 mt-4">
-              <button
-                onClick={handleAddNew}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <Save className="w-4 h-4" />
-                <span>Add Service</span>
-              </button>
-              <button
-                onClick={() => setIsAddingNew(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <X className="w-4 h-4" />
-                <span>Cancel</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'cars' && isAddingNewCar && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Add New Car Model</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Car Model Name
-                </label>
-                <input
-                  type="text"
-                  value={newCarModel.name}
-                  onChange={(e) => setNewCarModel({ ...newCarModel, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter car model name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Brand
-                </label>
-                <input
-                  type="text"
-                  value={newCarModel.brand}
-                  onChange={(e) => setNewCarModel({ ...newCarModel, brand: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter brand name"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-2 mt-4">
-              <button
-                onClick={handleAddNewCar}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <Save className="w-4 h-4" />
-                <span>Add Car Model</span>
-              </button>
-              <button
-                onClick={() => setIsAddingNewCar(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <X className="w-4 h-4" />
-                <span>Cancel</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         {activeTab === 'services' && (
           <ServiceManagement services={services} onUpdateServices={onUpdateServices} />
