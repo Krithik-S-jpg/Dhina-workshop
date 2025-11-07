@@ -16,9 +16,9 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
   const filteredBills = bills.filter(bill => {
     const term = searchTerm.toLowerCase();
     const matchesTerm =
-      bill.billNumber.toLowerCase().includes(term) ||
-      bill.customerName.toLowerCase().includes(term) ||
-      bill.vehicleNumber.toLowerCase().includes(term);
+      (bill.billNumber && bill.billNumber.toLowerCase().includes(term)) ||
+      (bill.customerName && bill.customerName.toLowerCase().includes(term)) ||
+      (bill.vehicleNumber && bill.vehicleNumber.toLowerCase().includes(term));
 
     const matchesDate = searchDate ? bill.date === searchDate : true;
 
