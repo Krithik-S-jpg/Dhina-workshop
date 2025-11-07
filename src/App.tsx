@@ -232,7 +232,7 @@ function App() {
     }
     return services.some(service =>
       service.category === cat.category &&
-      service.name.toLowerCase().includes(query)
+      service.name && service.name.toLowerCase().includes(query)
     );
   });
 
