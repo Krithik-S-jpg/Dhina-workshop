@@ -1,15 +1,14 @@
 import React from 'react';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { SavedBill } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface BillDetailsProps {
   bill: SavedBill;
   onBack: () => void;
+  isGstEnabled: boolean;
 }
 
-export function BillDetails({ bill, onBack }: BillDetailsProps) {
-  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
+export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
 
   const numberToWords = (num: number): string => {
     const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -70,7 +69,7 @@ export function BillDetails({ bill, onBack }: BillDetailsProps) {
               <div className="w-1/2 pl-4 text-right">
                 <p><span className="font-bold">Bill No:</span> {bill.billNumber}</p>
                 <p><span className="font-bold">Date:</span> {bill.date}</p>
-                <p><span className="font-bold">Vehicle:</span> {bill.vehicle}</p>
+                <p><span className="font-bold">Vehicle:</span> {bill.vehicleNumber}</p>
                 {isGstEnabled && <p><span className="font-bold">GST No:</span> {bill.gstNumber}</p>}
               </div>
             </div>

@@ -3,11 +3,11 @@ export interface Service {
   name: string;
   price: number;
   image: string;
-  hsnCode: string;
+  hsn_code: string;
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
   stock?: number;
-  discountPercentage?: number;
+  discount_percentage?: number;
 }
 
 export interface CarModel {
@@ -35,6 +35,7 @@ export interface Bill {
 }
 
 export interface SavedBill {
+  id: string;
   billNumber: string;
   customerName: string;
   customerAddress: string;
@@ -54,4 +55,5 @@ export interface SavedBill {
   total: number;
   gstAmount: number;
   netAmount: number;
+  bill_items: any[];
 }

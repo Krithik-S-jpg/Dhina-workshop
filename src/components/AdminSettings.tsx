@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Shield, Percent } from 'lucide-react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { defaultGstPercentage } from '../data/mockData';
 
 interface AdminSettingsProps {
   onBack: () => void;
+  isGstEnabled: boolean;
+  setIsGstEnabled: (value: boolean) => void;
+  gstPercentage: number;
+  setGstPercentage: (value: number) => void;
+  isDiscountEnabled: boolean;
+  setIsDiscountEnabled: (value: boolean) => void;
+  defaultGstPercentage: number;
 }
 
-export function AdminSettings({ onBack }: AdminSettingsProps) {
-  const [isGstEnabled, setIsGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
-  const [gstPercentage, setGstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [isDiscountEnabled, setIsDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
+export function AdminSettings({
+  onBack,
+  isGstEnabled,
+  setIsGstEnabled,
+  gstPercentage,
+  setGstPercentage,
+  isDiscountEnabled,
+  setIsDiscountEnabled,
+}: AdminSettingsProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

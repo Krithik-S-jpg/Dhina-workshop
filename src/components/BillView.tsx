@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Edit, Printer } from 'lucide-react';
 import { BillItem, CarModel, SavedBill } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { defaultGstPercentage } from '../data/mockData';
-// import logo from '../assets/logo.png'; // Assuming logo is placed here
 
 interface BillViewProps {
   billItems: BillItem[];
   carModel: CarModel;
   onBack: () => void;
   onSaveBill: (bill: SavedBill) => void;
+  isGstEnabled: boolean;
+  gstPercentage: number;
+  isDiscountEnabled: boolean;
 }
 
-export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewProps) {
-  const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
-  const [isDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
+export function BillView({
+  billItems,
+  carModel,
+  onBack,
+  onSaveBill,
+  isGstEnabled,
+  gstPercentage,
+  isDiscountEnabled,
+}: BillViewProps) {
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
   const [customerAddress, setCustomerAddress] = useState('CUSTOMER ADDRESS');
   const [customerPhone, setCustomerPhone] = useState('9000000000');
@@ -46,7 +51,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
       gstNumber,
       items: billItems.map(item => ({
         description: item.service.name,
-        hsnCode: item.service.hsnCode,
+        hsnCode: item.service.hsn_code,
         quantity: item.quantity,
         rate: item.service.price,
         taxPercentage: gstPercentage,
@@ -172,7 +177,7 @@ export function BillView({ billItems, carModel, onBack, onSaveBill }: BillViewPr
                   <tr key={item.service.id}>
                     <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                     <td className="border border-gray-400 p-2">{item.service.name}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.service.hsnCode}</td>
+                    <td className="border border-gray-400 p-2 text-center">{item.service.hsn_code}</td>
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
                     {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}

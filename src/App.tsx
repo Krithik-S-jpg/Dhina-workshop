@@ -8,9 +8,9 @@ import { AdminPanel } from './components/AdminPanel';
 import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
 import { BillDetails } from './components/BillDetails';
-import { useLocalStorage } from './hooks/useLocalStorage';
 import { Service, CarModel, BillItem, SavedBill } from './types';
-import { carModels, initialServices, defaultGstPercentage, serviceCategories } from './data/mockData';
+import { serviceCategories } from './data/categories';
+import { supabase } from './supabaseClient';
 
 type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel' | 'bill-records' | 'admin-settings' | 'bill-details';
 
@@ -19,20 +19,52 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service'>('water-service');
   const [billItems, setBillItems] = useState<BillItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
-  const [services, setServices] = useLocalStorage<Service[]>('car-wash-services', initialServices);
-  const [carModelsList, setCarModelsList] = useLocalStorage<CarModel[]>('car-models', carModels);
-  const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [savedBills, setSavedBills] = useLocalStorage<SavedBill[]>('car-wash-saved-bills', []);
+  const [selectedCarModel, setSelectedCarModel] = useState<CarModel | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [carModelsList, setCarModelsList] = useState<CarModel[]>([]);
+  const [savedBills, setSavedBills] = useState<SavedBill[]>([]);
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
+  const [isGstEnabled, setIsGstEnabled] = useState(true);
+  const [gstPercentage, setGstPercentage] = useState(18);
+  const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
+  const defaultGstPercentage = 18;
 
   useEffect(() => {
-    const migratedServices = services.map(s => ({
-      ...s,
-      stock: s.stock ?? 100, // Assign a default stock of 100 if it's missing
-    }));
-    setServices(migratedServices);
+    fetchServices();
+    fetchCarModels();
+    fetchSavedBills();
   }, []);
+
+  const fetchServices = async () => {
+    const { data, error } = await supabase.from('services').select('*');
+    if (error) console.error('Error fetching services:', error);
+    else setServices(data as Service[]);
+  };
+
+  const fetchCarModels = async () => {
+    const { data, error } = await supabase.from('car_models').select('*');
+    if (error) console.error('Error fetching car models:', error);
+    else {
+      setCarModelsList(data as CarModel[]);
+      if (data && data.length > 0) {
+        setSelectedCarModel(data[0] as CarModel);
+      }
+    }
+  };
+
+    const fetchSavedBills = async () => {
+    const { data, error } = await supabase.from('saved_bills').select('*, bill_items(*)');
+    if (error) {
+      console.error('Error fetching saved bills:', error);
+    } else {
+      const bills = data.map(bill => ({
+        ...bill,
+        items: bill.bill_items,
+      }));
+      setSavedBills(bills as SavedBill[]);
+    }
+  };
+
 
   const handleServiceCardClick = (category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service') => {
     setSelectedCategory(category);
@@ -44,17 +76,14 @@ function App() {
       const existingItem = prevItems.find(item => item.service.id === service.id);
 
       if (quantity <= 0) {
-        // Remove item if quantity is 0 or less
         return prevItems.filter(item => item.service.id !== service.id);
       }
 
       if (existingItem) {
-        // Update quantity if item exists
         return prevItems.map(item =>
           item.service.id === service.id ? { ...item, quantity } : item
         );
       } else {
-        // Add new item if it doesn't exist
         return [...prevItems, { service, quantity, selected: true, discountPercentage: service.discountPercentage }];
       }
     });
@@ -65,8 +94,16 @@ function App() {
     setCurrentView('bill');
   };
 
-  const handleDeleteBill = (billNumber: string) => {
-    setSavedBills(prevBills => prevBills.filter(b => b.billNumber !== billNumber));
+  const handleDeleteBill = async (billNumber: string) => {
+    const billToDelete = savedBills.find(b => b.billNumber === billNumber);
+    if (!billToDelete) return;
+
+    const { error } = await supabase.from('saved_bills').delete().match({ id: billToDelete.id });
+    if (error) {
+      console.error('Error deleting bill:', error);
+    } else {
+      setSavedBills(prevBills => prevBills.filter(b => b.billNumber !== billNumber));
+    }
   };
 
   const handleViewSavedBill = (bill: SavedBill, print = false) => {
@@ -77,24 +114,61 @@ function App() {
     }
   };
 
-  const handleSaveBill = (bill: SavedBill) => {
-    // Deduct stock from inventory
-    const updatedServices = services.map(service => {
-      const billedItem = bill.items.find(item => item.description === service.name);
-      if (billedItem && service.stock !== undefined) {
-        return {
-          ...service,
-          stock: service.stock - billedItem.quantity,
-        };
-      }
-      return service;
-    });
-    setServices(updatedServices);
-    localStorage.setItem('car-wash-services', JSON.stringify(updatedServices));
+  const handleSaveBill = async (bill: SavedBill) => {
+  const { data, error } = await supabase.from('saved_bills').insert([
+    {
+      bill_number: bill.billNumber,
+      customer_name: bill.customerName,
+      customer_address: bill.customerAddress,
+      customer_phone: bill.customerPhone,
+      vehicle_number: bill.vehicleNumber,
+      date: bill.date,
+      gst_number: bill.gstNumber,
+      total: bill.total,
+      gst_amount: bill.gstAmount,
+      net_amount: bill.netAmount,
+    }
+  ]).select().single();
 
-    setSavedBills(prevBills => [...prevBills, bill]);
-    setBillItems([]); // Clear current bill
-    setCurrentView('home'); // or 'bill-records'
+  if (error) {
+    console.error('Error saving bill:', error);
+    return;
+  }
+
+    const billId = data.id;
+
+  const billItemsToInsert = bill.items.map(item => ({
+    bill_id: billId,
+    description: item.description,
+    hsn_code: item.hsnCode,
+    quantity: item.quantity,
+    rate: item.rate,
+    tax_percentage: item.taxPercentage,
+    amount: item.amount,
+    discount_percentage: item.discountPercentage,
+  }));
+
+  const { error: itemsError } = await supabase.from('bill_items').insert(billItemsToInsert);
+
+  if (itemsError) {
+    console.error('Error saving bill items:', itemsError);
+    // Optionally, delete the saved_bill entry if items fail to save
+    await supabase.from('saved_bills').delete().match({ id: billId });
+    return;
+  }
+
+      for (const item of bill.items) {
+      const service = services.find(s => s.name === item.description);
+      if (service && service.stock !== undefined) {
+        const newStock = service.stock - item.quantity;
+        await supabase.from('services').update({ stock: newStock }).match({ id: service.id });
+      }
+    }
+
+    fetchServices();
+    fetchSavedBills();
+    setBillItems([]);
+    setCurrentView('home');
   };
 
   const handleViewBillRecords = () => {
@@ -130,13 +204,23 @@ function App() {
     setCurrentView('admin-settings');
   };
 
-  const handleUpdateServices = (updatedServices: Service[]) => {
-    setServices(updatedServices);
-  };
+  const handleUpdateServices = async (updatedServices: Service[]) => {
+  const { data, error } = await supabase.from('services').upsert(updatedServices).select();
+  if (error) {
+    console.error('Error updating services:', error);
+  } else {
+    setServices(data as Service[]);
+  }
+};
 
-  const handleUpdateCarModels = (updatedCarModels: CarModel[]) => {
-    setCarModelsList(updatedCarModels);
-  };
+  const handleUpdateCarModels = async (updatedCarModels: CarModel[]) => {
+  const { data, error } = await supabase.from('car_models').upsert(updatedCarModels).select();
+  if (error) {
+    console.error('Error updating car models:', error);
+  } else {
+    setCarModelsList(data as CarModel[]);
+  }
+};
 
   const filteredServiceCategories = serviceCategories.filter(cat => {
     if (!searchQuery) {
@@ -171,7 +255,18 @@ function App() {
   }
 
   if (currentView === 'admin-settings') {
-    return <AdminSettings onBack={handleBackToAdminPanel} />;
+    return (
+      <AdminSettings
+        onBack={handleBackToAdminPanel}
+        isGstEnabled={isGstEnabled}
+        setIsGstEnabled={setIsGstEnabled}
+        gstPercentage={gstPercentage}
+        setGstPercentage={setGstPercentage}
+        isDiscountEnabled={isDiscountEnabled}
+        setIsDiscountEnabled={setIsDiscountEnabled}
+        defaultGstPercentage={defaultGstPercentage}
+      />
+    );
   }
 
   if (currentView === 'bill-records') {
@@ -179,7 +274,7 @@ function App() {
   }
 
   if (currentView === 'bill-details' && billToView) {
-    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} />;
+    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} isGstEnabled={isGstEnabled} />;
   }
 
   if (currentView === 'service-selection') {
@@ -192,17 +287,23 @@ function App() {
         onViewBill={handleViewBill}
         billItems={billItems}
         onBillItemChange={handleBillItemChange}
+        isGstEnabled={isGstEnabled}
+        gstPercentage={gstPercentage}
+        isDiscountEnabled={isDiscountEnabled}
       />
     );
   }
 
-  if (currentView === 'bill') {
+  if (currentView === 'bill' && selectedCarModel) {
     return (
       <BillView
         billItems={billItems}
         carModel={selectedCarModel}
         onBack={handleBackToServices}
         onSaveBill={handleSaveBill}
+        isGstEnabled={isGstEnabled}
+        gstPercentage={gstPercentage}
+        isDiscountEnabled={isDiscountEnabled}
       />
     );
   }

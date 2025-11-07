@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { Service, CarModel, BillItem } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { defaultGstPercentage } from '../data/mockData';
 
 interface ServiceSelectionProps {
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
@@ -12,6 +10,9 @@ interface ServiceSelectionProps {
   onViewBill: (carModel: CarModel) => void;
   billItems: BillItem[];
   onBillItemChange: (service: Service, quantity: number) => void;
+  isGstEnabled: boolean;
+  gstPercentage: number;
+  isDiscountEnabled: boolean;
 }
 
 const categoryTitles = {
@@ -22,11 +23,19 @@ const categoryTitles = {
   'ac-service': 'A/C Services',
 };
 
-export function ServiceSelection({ category, services, carModels, onBack, onViewBill, billItems, onBillItemChange }: ServiceSelectionProps) {
+export function ServiceSelection({
+  category,
+  services,
+  carModels,
+  onBack,
+  onViewBill,
+  billItems,
+  onBillItemChange,
+  isGstEnabled,
+  gstPercentage,
+  isDiscountEnabled,
+}: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
-  const [gstPercentage] = useLocalStorage<number>('car-wash-gst', defaultGstPercentage);
-  const [isGstEnabled] = useLocalStorage<boolean>('is-gst-enabled', true);
-  const [isDiscountEnabled] = useLocalStorage<boolean>('is-discount-enabled', true);
 
   const categoryServices = services.filter(service => service.category === category);
 

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, ArrowLeft } from 'lucide-react';
 import { Service } from '../types';
 import { ServiceCard } from './ServiceCard';
-import { serviceCategories } from '../data/mockData';
+import { serviceCategories } from '../data/categories';
+import { supabase } from '../supabaseClient';
 
 interface ServiceManagementProps {
   services: Service[];
@@ -18,7 +19,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     category: 'water-service',
     description: '',
     image: '',
-    hsnCode: '',
+    hsn_code: '',
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -28,37 +29,43 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     setIsAddingNew(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingService) {
-      const updatedServices = services.map(s =>
-        s.id === editingService.id ? editingService : s
-      );
-      onUpdateServices(updatedServices);
-      setEditingService(null);
+      const { data, error } = await supabase.from('services').update(editingService).match({ id: editingService.id }).select();
+      if (error) {
+        console.error('Error updating service:', error);
+      } else {
+        const updatedServices = services.map(s =>
+          s.id === editingService.id ? data[0] as Service : s
+        );
+        onUpdateServices(updatedServices);
+        setEditingService(null);
+      }
     }
   };
 
-  const handleDelete = (serviceId: string) => {
+  const handleDelete = async (serviceId: string) => {
     if (confirm('Are you sure you want to delete this service?')) {
-      const updatedServices = services.filter(s => s.id !== serviceId);
-      onUpdateServices(updatedServices);
+      const { error } = await supabase.from('services').delete().match({ id: serviceId });
+      if (error) {
+        console.error('Error deleting service:', error);
+      } else {
+        const updatedServices = services.filter(s => s.id !== serviceId);
+        onUpdateServices(updatedServices);
+      }
     }
   };
 
-  const handleAddNew = () => {
+  const handleAddNew = async () => {
     if (newService.name && newService.price) {
-      const service: Service = {
-        id: Date.now().toString(),
-        name: newService.name,
-        price: newService.price,
-        category: newService.category as Service['category'],
-        description: newService.description,
-        image: newService.image,
-        hsnCode: newService.hsnCode || '',
-      };
-      onUpdateServices([...services, service]);
-      setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsnCode: '' });
-      setIsAddingNew(false);
+      const { data, error } = await supabase.from('services').insert([newService]).select();
+      if (error) {
+        console.error('Error adding new service:', error);
+      } else {
+        onUpdateServices([...services, data[0] as Service]);
+        setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsn_code: '' });
+        setIsAddingNew(false);
+      }
     }
   };
 
@@ -134,7 +141,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             </select>
             <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-            <input type="text" placeholder="HSN Code" value={newService.hsnCode} onChange={(e) => setNewService({ ...newService, hsnCode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -182,7 +189,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               </select>
               <input type="text" placeholder="Description" value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              <input type="text" placeholder="HSN Code" value={editingService.hsnCode} onChange={(e) => setEditingService({ ...editingService, hsnCode: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>
