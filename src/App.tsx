@@ -58,8 +58,26 @@ function App() {
       console.error('Error fetching saved bills:', error);
     } else {
       const bills = data.map(bill => ({
-        ...bill,
-        items: bill.bill_items,
+        id: bill.id,
+        billNumber: bill.bill_number,
+        customerName: bill.customer_name,
+        customerAddress: bill.customer_address,
+        customerPhone: bill.customer_phone,
+        vehicleNumber: bill.vehicle_number,
+        date: bill.date,
+        gstNumber: bill.gst_number,
+        total: bill.total,
+        gstAmount: bill.gst_amount,
+        netAmount: bill.net_amount,
+        items: bill.bill_items.map((item: any) => ({
+          description: item.description,
+          hsnCode: item.hsn_code,
+          quantity: item.quantity,
+          rate: item.rate,
+          taxPercentage: item.tax_percentage,
+          amount: item.amount,
+          discountPercentage: item.discount_percentage,
+        })),
       }));
       setSavedBills(bills as SavedBill[]);
     }
