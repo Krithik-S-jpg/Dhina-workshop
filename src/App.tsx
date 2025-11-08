@@ -261,6 +261,7 @@ function App() {
       <AdminPanel
         services={services}
         carModels={carModelsList}
+        savedBills={savedBills}
         onBack={handleBackToHome}
         onUpdateServices={handleUpdateServices}
         onUpdateCarModels={handleUpdateCarModels}

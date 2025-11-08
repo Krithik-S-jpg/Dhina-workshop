@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
-import { Service, CarModel } from '../types';
+import { Service, CarModel, SavedBill } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
 import { ServiceManagement } from './ServiceManagement';
+import { Summary } from './Summary';
 
 interface AdminPanelProps {
   services: Service[];
   carModels: CarModel[];
+  savedBills: SavedBill[];
   onBack: () => void;
   onUpdateServices: (services: Service[]) => void;
   onUpdateCarModels: (carModels: CarModel[]) => void;
@@ -15,8 +17,8 @@ interface AdminPanelProps {
   onNavigateToSettings: () => void;
 }
 
-export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory'>('services');
+export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
+  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -24,6 +26,12 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
     const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
     name: '',
     brand: '',
+  });
+
+  const todaysBills = savedBills.filter(bill => {
+    const billDate = new Date(bill.date.split('/').reverse().join('-'));
+    const today = new Date();
+    return billDate.toDateString() === today.toDateString();
   });
 
   useEffect(() => {
@@ -131,6 +139,16 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
               Inventory Management
             </button>
             <button
+              onClick={() => setActiveTab('summary')}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'summary'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Summary
+            </button>
+            <button
               onClick={onNavigateToSettings}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
               data-testid="settings-button"
@@ -162,6 +180,10 @@ export function AdminPanel({ services, carModels, onBack, onUpdateServices, onUp
 
         {activeTab === 'services' && (
           <ServiceManagement services={services} onUpdateServices={onUpdateServices} />
+        )}
+
+        {activeTab === 'summary' && (
+          <Summary todaysBills={todaysBills} services={services} />
         )}
 
         {activeTab === 'inventory' && (
