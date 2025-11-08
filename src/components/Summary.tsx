@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SavedBill, BillItem as SavedBillItem, Service } from '../types';
 import { serviceCategories } from '../data/categories';
 
 interface SummaryProps {
-  todaysBills: SavedBill[];
+  bills: SavedBill[];
   services: Service[];
 }
 
@@ -11,11 +11,18 @@ interface BillItem extends SavedBillItem {
   category?: Service['category'];
 }
 
-export function Summary({ todaysBills, services }: SummaryProps) {
-  const totalRevenue = todaysBills.reduce((acc, bill) => acc + bill.netAmount, 0);
+export function Summary({ bills, services }: SummaryProps) {
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const filteredBills = bills.filter(bill => {
+    const billDate = new Date(bill.date.split('/').reverse().join('-'));
+    return billDate.toISOString().split('T')[0] === selectedDate;
+  });
+
+  const totalRevenue = filteredBills.reduce((acc, bill) => acc + bill.netAmount, 0);
 
   const categoryTotals = serviceCategories.map(category => {
-    const total = todaysBills.reduce((acc, bill) => {
+    const total = filteredBills.reduce((acc, bill) => {
       return acc + bill.items.reduce((itemAcc, item) => {
         const service = services.find(s => s.name === item.description);
         if (service && service.category === category.category) {
@@ -27,7 +34,7 @@ export function Summary({ todaysBills, services }: SummaryProps) {
     return { ...category, total };
   });
 
-  const soldItems = todaysBills.flatMap(bill => bill.items).reduce((acc, item) => {
+  const soldItems = filteredBills.flatMap(bill => bill.items).reduce((acc, item) => {
     const existingItem = acc.find(i => i.description === item.description);
     if (existingItem) {
       existingItem.quantity += item.quantity;
@@ -39,7 +46,15 @@ export function Summary({ todaysBills, services }: SummaryProps) {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">Today's Summary</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800">Summary for {new Date(selectedDate).toLocaleDateString('en-IN')}</h2>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg"
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-blue-50 p-4 rounded-lg text-center">
@@ -48,7 +63,7 @@ export function Summary({ todaysBills, services }: SummaryProps) {
         </div>
         <div className="bg-green-50 p-4 rounded-lg text-center">
           <h3 className="text-lg font-semibold text-green-800">Total Bills</h3>
-          <p className="text-3xl font-bold text-green-600">{todaysBills.length}</p>
+          <p className="text-3xl font-bold text-green-600">{filteredBills.length}</p>
         </div>
         <div className="bg-yellow-50 p-4 rounded-lg text-center">
           <h3 className="text-lg font-semibold text-yellow-800">Items Sold</h3>

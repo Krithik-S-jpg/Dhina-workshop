@@ -28,12 +28,6 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
     brand: '',
   });
 
-  const todaysBills = savedBills.filter(bill => {
-    const billDate = new Date(bill.date.split('/').reverse().join('-'));
-    const today = new Date();
-    return billDate.toDateString() === today.toDateString();
-  });
-
   useEffect(() => {
     setEditableServices(services);
   }, [services]);
@@ -183,7 +177,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
         )}
 
         {activeTab === 'summary' && (
-          <Summary todaysBills={todaysBills} services={services} />
+          <Summary bills={savedBills} services={services} />
         )}
 
         {activeTab === 'inventory' && (
