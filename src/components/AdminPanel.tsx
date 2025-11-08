@@ -5,6 +5,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
 import { ServiceManagement } from './ServiceManagement';
 import { Summary } from './Summary';
+import { Notifications } from './Notifications';
 
 interface AdminPanelProps {
   services: Service[];
@@ -18,7 +19,7 @@ interface AdminPanelProps {
 }
 
 export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary'>('services');
+  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -27,6 +28,8 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
     name: '',
     brand: '',
   });
+
+  const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < 200);
 
   useEffect(() => {
     setEditableServices(services);
@@ -143,6 +146,21 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
               Summary
             </button>
             <button
+              onClick={() => setActiveTab('notifications')}
+              className={`relative flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'notifications'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Notifications
+              {lowStockServices.length > 0 && (
+                <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                  {lowStockServices.length}
+                </span>
+              )}
+            </button>
+            <button
               onClick={onNavigateToSettings}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
               data-testid="settings-button"
@@ -178,6 +196,10 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
 
         {activeTab === 'summary' && (
           <Summary bills={savedBills} services={services} />
+        )}
+
+        {activeTab === 'notifications' && (
+          <Notifications lowStockServices={lowStockServices} />
         )}
 
         {activeTab === 'inventory' && (
