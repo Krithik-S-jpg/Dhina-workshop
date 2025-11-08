@@ -11,7 +11,6 @@ interface ServiceSelectionProps {
   billItems: BillItem[];
   onBillItemChange: (service: Service, quantity: number) => void;
   isGstEnabled: boolean;
-  gstPercentage: number;
   isDiscountEnabled: boolean;
 }
 
@@ -49,7 +48,15 @@ export function ServiceSelection({
     return sum + (item.service.price * item.quantity * discount);
   }, 0);
   const totalAfterDiscount = subtotal - totalDiscount;
-  const gstAmount = isGstEnabled ? (totalAfterDiscount * gstPercentage) / 100 : 0;
+  const gstAmount = isGstEnabled
+    ? billItems.reduce((sum, item) => {
+        const itemTotal = item.service.price * item.quantity;
+        const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
+        const priceAfterDiscount = itemTotal - discountAmount;
+        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
+        return sum + itemGst;
+      }, 0)
+    : 0;
   const finalTotal = totalAfterDiscount + gstAmount;
 
   return (
@@ -180,7 +187,7 @@ export function ServiceSelection({
                       )}
                       {isGstEnabled && (
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">GST ({gstPercentage}%):</span>
+                          <span className="text-sm text-slate-600">GST:</span>
                           <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
                         </div>
                       )}

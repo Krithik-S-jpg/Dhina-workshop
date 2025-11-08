@@ -25,9 +25,7 @@ function App() {
   const [savedBills, setSavedBills] = useState<SavedBill[]>([]);
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
   const [isGstEnabled, setIsGstEnabled] = useState(true);
-  const [gstPercentage, setGstPercentage] = useState(18);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
-  const defaultGstPercentage = 18;
 
   useEffect(() => {
     fetchServices();
@@ -278,11 +276,8 @@ function App() {
         onBack={handleBackToAdminPanel}
         isGstEnabled={isGstEnabled}
         setIsGstEnabled={setIsGstEnabled}
-        gstPercentage={gstPercentage}
-        setGstPercentage={setGstPercentage}
         isDiscountEnabled={isDiscountEnabled}
         setIsDiscountEnabled={setIsDiscountEnabled}
-        defaultGstPercentage={defaultGstPercentage}
       />
     );
   }
@@ -306,7 +301,6 @@ function App() {
         billItems={billItems}
         onBillItemChange={handleBillItemChange}
         isGstEnabled={isGstEnabled}
-        gstPercentage={gstPercentage}
         isDiscountEnabled={isDiscountEnabled}
       />
     );
@@ -320,7 +314,6 @@ function App() {
         onBack={handleBackToServices}
         onSaveBill={handleSaveBill}
         isGstEnabled={isGstEnabled}
-        gstPercentage={gstPercentage}
         isDiscountEnabled={isDiscountEnabled}
       />
     );

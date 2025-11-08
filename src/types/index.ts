@@ -8,6 +8,7 @@ export interface Service {
   description?: string;
   stock?: number;
   discount_percentage?: number;
+  gst_percentage?: number;
 }
 
 export interface CarModel {

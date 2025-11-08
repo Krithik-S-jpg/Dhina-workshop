@@ -5,19 +5,14 @@ interface AdminSettingsProps {
   onBack: () => void;
   isGstEnabled: boolean;
   setIsGstEnabled: (value: boolean) => void;
-  gstPercentage: number;
-  setGstPercentage: (value: number) => void;
   isDiscountEnabled: boolean;
   setIsDiscountEnabled: (value: boolean) => void;
-  defaultGstPercentage: number;
 }
 
 export function AdminSettings({
   onBack,
   isGstEnabled,
   setIsGstEnabled,
-  gstPercentage,
-  setGstPercentage,
   isDiscountEnabled,
   setIsDiscountEnabled,
 }: AdminSettingsProps) {
@@ -93,21 +88,6 @@ export function AdminSettings({
                 <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isGstEnabled ? 'translate-x-7' : 'translate-x-1'}`}></span>
               </div>
             </div>
-            {isGstEnabled && (
-              <div className="flex items-center space-x-3">
-                <label className="text-sm font-medium text-slate-700">GST Percentage:</label>
-                <input
-                  type="number"
-                  value={gstPercentage}
-                  onChange={(e) => setGstPercentage(Number(e.target.value))}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
-                  min="0"
-                  max="50"
-                  step="0.1"
-                />
-                <span className="text-sm text-slate-600">%</span>
-              </div>
-            )}
           </div>
 
           {/* Discount Settings */}

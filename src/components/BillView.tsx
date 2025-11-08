@@ -8,7 +8,6 @@ interface BillViewProps {
   onBack: () => void;
   onSaveBill: (bill: SavedBill) => void;
   isGstEnabled: boolean;
-  gstPercentage: number;
   isDiscountEnabled: boolean;
 }
 
@@ -18,7 +17,6 @@ export function BillView({
   onBack,
   onSaveBill,
   isGstEnabled,
-  gstPercentage,
   isDiscountEnabled,
 }: BillViewProps) {
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
@@ -34,7 +32,15 @@ export function BillView({
     return sum + (item.service.price * item.quantity * discount);
   }, 0) : 0;
   const totalAfterDiscount = subtotal - totalDiscount;
-  const gstAmount = isGstEnabled ? (totalAfterDiscount * gstPercentage) / 100 : 0;
+  const gstAmount = isGstEnabled
+    ? billItems.reduce((sum, item) => {
+        const itemTotal = item.service.price * item.quantity;
+        const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
+        const priceAfterDiscount = itemTotal - discountAmount;
+        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
+        return sum + itemGst;
+      }, 0)
+    : 0;
   const netAmount = totalAfterDiscount + gstAmount;
 
   const billNumber = `B${Math.random().toString().substr(2, 6).toUpperCase()}`;
@@ -54,7 +60,7 @@ export function BillView({
         hsnCode: item.service.hsn_code,
         quantity: item.quantity,
         rate: item.service.price,
-        taxPercentage: gstPercentage,
+        taxPercentage: item.service.gst_percentage ?? 0,
         amount: item.service.price * item.quantity,
         discountPercentage: item.discountPercentage,
       })),
@@ -181,7 +187,7 @@ export function BillView({
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
                     {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}
-                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{gstPercentage}%</td>}
+                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{item.service.gst_percentage ?? 0}%</td>}
                     <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))}
@@ -223,7 +229,7 @@ export function BillView({
                   )}
                   {isGstEnabled && (
                     <div className="flex justify-between">
-                      <span className="font-bold">GST ({gstPercentage}%):</span>
+                      <span className="font-bold">GST:</span>
                       <span>{gstAmount.toFixed(2)}</span>
                     </div>
                   )}

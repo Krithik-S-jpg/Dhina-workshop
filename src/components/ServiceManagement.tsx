@@ -20,6 +20,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     description: '',
     image: '',
     hsn_code: '',
+    gst_percentage: 0,
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -142,6 +143,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="number" placeholder="GST %" value={newService.gst_percentage} onChange={(e) => setNewService({ ...newService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -190,6 +192,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               <input type="text" placeholder="Description" value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="number" placeholder="GST %" value={editingService.gst_percentage} onChange={(e) => setEditingService({ ...editingService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>
