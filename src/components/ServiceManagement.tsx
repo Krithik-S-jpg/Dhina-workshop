@@ -152,31 +152,46 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {filteredServices.map(service => (
-          <div key={service.id} className="relative">
-            <ServiceCard
-              title={service.name}
-              image={service.image || ''}
-              category={service.category}
-              onClick={() => handleEdit(service)}
-            />
-            <div className="absolute top-2 right-2 flex space-x-2">
-              <button
-                onClick={() => handleEdit(service)}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleDelete(service.id)}
-                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="w-full">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">HSN Code</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">GST %</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredServices.map(service => (
+              <tr key={service.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{service.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">₹{service.price}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.description}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.hsn_code}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.gst_percentage}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(service.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {editingService && (
