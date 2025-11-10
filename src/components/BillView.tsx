@@ -191,19 +191,6 @@ export function BillView({
                     <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))}
-                {/* Add empty rows for spacing */}
-                {Array.from({ length: Math.max(0, 10 - billItems.length) }).map((_, i) => (
-                  <tr key={`empty-${i}`}>
-                    <td className="border border-gray-400 p-2 h-8"></td>
-                    <td className="border border-gray-400 p-2"></td>
-                    <td className="border border-gray-400 p-2"></td>
-                    <td className="border border-gray-400 p-2"></td>
-                    <td className="border border-gray-400 p-2"></td>
-                    {isDiscountEnabled && <td className="border border-gray-400 p-2"></td>}
-                    {isGstEnabled && <td className="border border-gray-400 p-2"></td>}
-                    <td className="border border-gray-400 p-2"></td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </section>
