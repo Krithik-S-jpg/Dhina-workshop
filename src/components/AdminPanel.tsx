@@ -20,6 +20,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications'>('services');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -30,6 +31,10 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
   });
 
   const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < 200);
+
+  const filteredServices = selectedCategory === 'all'
+    ? editableServices
+    : editableServices.filter(service => service.category === selectedCategory);
 
   useEffect(() => {
     setEditableServices(services);
@@ -206,8 +211,19 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Inventory Levels</h3>
-              <button
-                onClick={() => {
+              <div className="flex items-center space-x-4">
+                <select
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Categories</option>
+                  {categoryOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
                   onUpdateServices(editableServices);
                   setSuccessMessage('Stock updated successfully!');
                   setTimeout(() => setSuccessMessage(''), 3000);
@@ -217,6 +233,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>
+              </div>
             </div>
             {successMessage && (
               <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
@@ -239,7 +256,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {editableServices.map(service => (
+                  {filteredServices.map(service => (
                     <tr key={service.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-slate-900">{service.name}</div>
