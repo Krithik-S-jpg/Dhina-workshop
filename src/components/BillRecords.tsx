@@ -20,7 +20,13 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
       (bill.customerName && bill.customerName.toLowerCase().includes(term)) ||
       (bill.vehicleNumber && bill.vehicleNumber.toLowerCase().includes(term));
 
-    const matchesDate = searchDate ? bill.date === searchDate : true;
+    const matchesDate = searchDate ? (() => {
+      if (!bill.date || typeof bill.date !== 'string') return false;
+      const [day, month, year] = bill.date.split('/');
+      if (!day || !month || !year) return false;
+      const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      return formattedDate === searchDate;
+    })() : true;
 
     return matchesTerm && matchesDate;
   });
