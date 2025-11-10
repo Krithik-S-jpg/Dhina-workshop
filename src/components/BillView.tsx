@@ -174,7 +174,7 @@ export function BillView({
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
                   {isDiscountEnabled && <th className="border border-gray-400 p-2">Discount</th>}
-                  {isGstEnabled && <th className="border border-gray-400 p-2">Tax%</th>}
+                  {isGstEnabled && <th className="border border-gray-400 p-2">SGST/CGST</th>}
                   <th className="border border-gray-400 p-2">Amount</th>
                 </tr>
               </thead>
@@ -187,7 +187,7 @@ export function BillView({
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
                     {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}
-                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{item.service.gst_percentage ?? 0}%</td>}
+                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(item.service.gst_percentage ?? 0) / 2}%+{(item.service.gst_percentage ?? 0) / 2}%</td>}
                     <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))}
@@ -215,10 +215,16 @@ export function BillView({
                     </div>
                   )}
                   {isGstEnabled && (
-                    <div className="flex justify-between">
-                      <span className="font-bold">GST:</span>
-                      <span>{gstAmount.toFixed(2)}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between">
+                        <span className="font-bold">SGST:</span>
+                        <span>{(gstAmount / 2).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">CGST:</span>
+                        <span>{(gstAmount / 2).toFixed(2)}</span>
+                      </div>
+                    </>
                   )}
                   <div className="flex justify-between font-extrabold text-lg border-t-2 border-b-2 border-gray-800 my-1 py-1">
                     <span>Net Amount:</span>

@@ -66,6 +66,8 @@ function App() {
         gstNumber: bill.gst_number,
         total: bill.total,
         gstAmount: bill.gst_amount,
+        sgst_amount: bill.sgst_amount,
+        cgst_amount: bill.cgst_amount,
         netAmount: bill.net_amount,
         items: bill.bill_items.map((item: any) => ({
           description: item.description,
@@ -142,6 +144,8 @@ function App() {
       gst_number: bill.gstNumber,
       total: bill.total,
       gst_amount: bill.gstAmount,
+      sgst_amount: bill.sgst_amount,
+      cgst_amount: bill.cgst_amount,
       net_amount: bill.netAmount,
     }
   ]).select().single();

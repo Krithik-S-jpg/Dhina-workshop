@@ -84,9 +84,17 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                   <th className="border border-gray-400 p-2">HSN Code</th>
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
-                  {isGstEnabled && <th className="border border-gray-400 p-2">Tax%</th>}
+                  {isGstEnabled && <th colSpan={2} className="border border-gray-400 p-2">GST</th>}
                   <th className="border border-gray-400 p-2">Amount</th>
                 </tr>
+                {isGstEnabled && (
+                  <tr className="bg-gray-200">
+                    <th className="border border-gray-400 p-2" colSpan={5}></th>
+                    <th className="border border-gray-400 p-2">SGST%</th>
+                    <th className="border border-gray-400 p-2">CGST%</th>
+                    <th className="border border-gray-400 p-2"></th>
+                  </tr>
+                )}
               </thead>
               <tbody>
                 {bill.items.map((item, index) => (
@@ -96,7 +104,8 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                     <td className="border border-gray-400 p-2 text-center">{item.hsnCode}</td>
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.rate.toFixed(2)}</td>
-                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{item.taxPercentage}%</td>}
+                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(item.taxPercentage / 2).toFixed(2)}%</td>}
+                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(item.taxPercentage / 2).toFixed(2)}%</td>}
                     <td className="border border-gray-400 p-2 text-right">{item.amount.toFixed(2)}</td>
                   </tr>
                 ))}
@@ -107,6 +116,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
+                    {isGstEnabled && <td className="border border-gray-400 p-2"></td>}
                     {isGstEnabled && <td className="border border-gray-400 p-2"></td>}
                     <td className="border border-gray-400 p-2"></td>
                   </tr>
@@ -129,10 +139,16 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                     <span>{bill.total.toFixed(2)}</span>
                   </div>
                   {isGstEnabled && (
-                    <div className="flex justify-between">
-                      <span className="font-bold">GST ({bill.items[0]?.taxPercentage || 0}%):</span>
-                      <span>{bill.gstAmount.toFixed(2)}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between">
+                        <span className="font-bold">SGST:</span>
+                        <span>{bill.sgst_amount?.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-bold">CGST:</span>
+                        <span>{bill.cgst_amount?.toFixed(2)}</span>
+                      </div>
+                    </>
                   )}
                   <div className="flex justify-between font-extrabold text-lg border-t-2 border-b-2 border-gray-800 my-1 py-1">
                     <span>Net Amount:</span>
