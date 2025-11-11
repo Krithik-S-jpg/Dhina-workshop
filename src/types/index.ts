@@ -56,5 +56,6 @@ export interface SavedBill {
   total: number;
   gstAmount: number;
   netAmount: number;
+  paymentMethod?: 'Cash' | 'Online';
   bill_items: any[];
 }

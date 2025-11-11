@@ -24,6 +24,7 @@ export function BillView({
   const [customerPhone, setCustomerPhone] = useState('9000000000');
   const [vehicleNumber, setVehicleNumber] = useState('TN-31-0000');
   const [gstNumber, setGstNumber] = useState('GST123456789');
+  const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Online'>('Cash');
   const [isEditing, setIsEditing] = useState(true);
 
   const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
@@ -55,6 +56,7 @@ export function BillView({
       vehicleNumber: vehicleNumber,
       date: currentDate,
       gstNumber,
+      paymentMethod,
       items: billItems.map(item => ({
         description: item.service.name,
         hsnCode: item.service.hsn_code,
@@ -201,6 +203,19 @@ export function BillView({
                 <p className="text-xs">E. & O.E.</p>
                 <p><span className="font-bold">Total Qty:</span> {billItems.reduce((sum, item) => sum + item.quantity, 0)}</p>
                 <p className="font-bold">Rupees {numberToWords(Math.round(netAmount))}</p>
+                <div className="mt-4">
+                  <span className="font-bold">Payment Method:</span>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <label className="flex items-center">
+                      <input type="radio" name="paymentMethod" value="Cash" checked={paymentMethod === 'Cash'} onChange={() => setPaymentMethod('Cash')} className="mr-2" />
+                      Cash
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="paymentMethod" value="Online" checked={paymentMethod === 'Online'} onChange={() => setPaymentMethod('Online')} className="mr-2" />
+                      Online
+                    </label>
+                  </div>
+                </div>
               </div>
               <div className="w-1/3">
                 <div className="space-y-1">

@@ -131,6 +131,9 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                 <p className="text-xs">E. & O.E.</p>
                 <p><span className="font-bold">Total Qty:</span> {bill.items.reduce((sum, item) => sum + item.quantity, 0)}</p>
                 <p className="font-bold">Rupees {numberToWords(Math.round(bill.netAmount))}</p>
+                {bill.paymentMethod && (
+                  <p className="mt-2"><span className="font-bold">Payment Method:</span> {bill.paymentMethod}</p>
+                )}
               </div>
               <div className="w-1/3">
                 <div className="space-y-1">
