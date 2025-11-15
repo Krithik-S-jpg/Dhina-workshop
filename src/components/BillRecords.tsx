@@ -81,6 +81,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle Number</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Total Amount</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
                   <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
                 </tr>
               </thead>
@@ -94,6 +95,7 @@ export function BillRecords({ bills, onBack, onViewBill, onDeleteBill }: BillRec
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.vehicleNumber}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.items.map(i => i.description).join(', ')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-right">₹{bill.netAmount.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{bill.paymentMethod || 'N/A'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">
                         <button onClick={() => onViewBill(bill)} className="text-blue-600 hover:text-blue-800 transition-colors" title="View Bill">
                           <Eye className="w-5 h-5" />
