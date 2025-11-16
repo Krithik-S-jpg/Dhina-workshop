@@ -24,6 +24,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [defaultGst, setDefaultGst] = useState(0);
 
   const handleEdit = (service: Service) => {
     setEditingService({ ...service });
@@ -59,7 +60,8 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
 
   const handleAddNew = async () => {
     if (newService.name && newService.price) {
-      const { data, error } = await supabase.from('services').insert([newService]).select();
+      const serviceToAdd = { ...newService, gst_percentage: newService.gst_percentage || defaultGst };
+      const { data, error } = await supabase.from('services').insert([serviceToAdd]).select();
       if (error) {
         console.error('Error adding new service:', error);
       } else {
@@ -118,6 +120,30 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
         >
           <Plus className="w-4 h-4" />
           <span>Add New Service</span>
+        </button>
+      </div>
+
+      <div className="mb-4 flex items-center space-x-4">
+        <input
+          type="number"
+          placeholder="Default GST %"
+          value={defaultGst}
+          onChange={(e) => setDefaultGst(Number(e.target.value))}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={() => {
+            const updatedServices = services.map(service => {
+              if (service.category === selectedCategory) {
+                return { ...service, gst_percentage: defaultGst };
+              }
+              return service;
+            });
+            onUpdateServices(updatedServices);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          Apply to All
         </button>
       </div>
 

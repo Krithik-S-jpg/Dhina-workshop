@@ -55,6 +55,9 @@ export interface SavedBill {
   }[];
   total: number;
   gstAmount: number;
+  sgst_amount?: number;
+  cgst_amount?: number;
   netAmount: number;
+  paymentMethod?: string;
   bill_items: any[];
 }
