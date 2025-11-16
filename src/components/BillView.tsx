@@ -24,6 +24,7 @@ export function BillView({
   const [customerPhone, setCustomerPhone] = useState('9000000000');
   const [vehicleNumber, setVehicleNumber] = useState('TN-31-0000');
   const [gstNumber, setGstNumber] = useState('GST123456789');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [isEditing, setIsEditing] = useState(true);
 
   const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
@@ -67,6 +68,7 @@ export function BillView({
       total: subtotal,
       gstAmount,
       netAmount,
+      paymentMethod,
     };
     onSaveBill(billToSave);
   };
@@ -229,6 +231,21 @@ export function BillView({
                   <div className="flex justify-between font-extrabold text-lg border-t-2 border-b-2 border-gray-800 my-1 py-1">
                     <span>Net Amount:</span>
                     <span>{netAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="font-bold">Payment Method:</span>
+                    {isEditing ? (
+                      <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="p-1 border border-dashed border-gray-400 rounded"
+                      >
+                        <option value="Cash">Cash</option>
+                        <option value="Online">Online</option>
+                      </select>
+                    ) : (
+                      <span>{paymentMethod}</span>
+                    )}
                   </div>
                 </div>
               </div>

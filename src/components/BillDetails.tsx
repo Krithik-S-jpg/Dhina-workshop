@@ -70,6 +70,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                 <p><span className="font-bold">Bill No:</span> {bill.billNumber}</p>
                 <p><span className="font-bold">Date:</span> {bill.date}</p>
                 <p><span className="font-bold">Vehicle:</span> {bill.vehicleNumber}</p>
+                <p><span className="font-bold">Payment Method:</span> {bill.paymentMethod}</p>
                 {isGstEnabled && <p><span className="font-bold">GST No:</span> {bill.gstNumber}</p>}
               </div>
             </div>

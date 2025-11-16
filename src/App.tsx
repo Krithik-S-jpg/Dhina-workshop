@@ -69,6 +69,7 @@ function App() {
         sgst_amount: bill.sgst_amount,
         cgst_amount: bill.cgst_amount,
         netAmount: bill.net_amount,
+        paymentMethod: bill.payment_method,
         items: bill.bill_items.map((item: any) => ({
           description: item.description,
           hsnCode: item.hsn_code,
@@ -147,6 +148,7 @@ function App() {
       sgst_amount: bill.sgst_amount,
       cgst_amount: bill.cgst_amount,
       net_amount: bill.netAmount,
+      payment_method: bill.paymentMethod,
     }
   ]).select().single();
 
