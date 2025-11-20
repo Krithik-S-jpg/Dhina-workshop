@@ -24,6 +24,7 @@ export function BillView({
   const [customerPhone, setCustomerPhone] = useState('9000000000');
   const [vehicleNumber, setVehicleNumber] = useState('TN-31-0000');
   const [gstNumber, setGstNumber] = useState('GST123456789');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [isEditing, setIsEditing] = useState(true);
 
   const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
@@ -66,7 +67,10 @@ export function BillView({
       })),
       total: subtotal,
       gstAmount,
+      sgst_amount: gstAmount / 2,
+      cgst_amount: gstAmount / 2,
       netAmount,
+      paymentMethod,
     };
     onSaveBill(billToSave);
   };
@@ -120,7 +124,7 @@ export function BillView({
             <div className="flex items-center">
               {/* <img src={logo} alt="Bull Logo" className="h-20 mr-4" /> */}
               <div>
-                <h2 className="text-3xl font-extrabold text-gray-800">Nagu Enterprises</h2>
+                <h2 className="text-3xl font-extrabold text-gray-800">Nagu Automobiles</h2>
                 <p className="text-sm"># 2/A-2, Tanjore Main Road, OPP. SIT Hostel,</p>
                 <p className="text-sm">Ariyamangalam, Trichy - 620010.</p>
                 <p className="text-sm">HP: 95850 71712, 96264 00785</p>
@@ -230,11 +234,26 @@ export function BillView({
                     <span>Net Amount:</span>
                     <span>{netAmount.toFixed(2)}</span>
                   </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="font-bold">Payment Method:</span>
+                    {isEditing ? (
+                      <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="p-1 border border-dashed border-gray-400 rounded"
+                      >
+                        <option value="Cash">Cash</option>
+                        <option value="Online">Online</option>
+                      </select>
+                    ) : (
+                      <span>{paymentMethod}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
             <div className="mt-12 text-right">
-              <p className="font-bold">For Nagu Enterprises</p>
+              <p className="font-bold">For Nagu Automobiles</p>
               <div className="mt-16 border-t border-dashed border-gray-500 pt-1 inline-block">
                 Authorized Signatory
               </div>
