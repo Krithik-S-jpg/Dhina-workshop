@@ -124,10 +124,10 @@ export function BillView({
             <div className="flex items-center">
               {/* <img src={logo} alt="Bull Logo" className="h-20 mr-4" /> */}
               <div>
-                <h2 className="text-3xl font-extrabold text-gray-800">Nagu Enterprises</h2>
-                <p className="text-sm"># 2/A-2, Tanjore Main Road, OPP. SIT Hostel,</p>
-                <p className="text-sm">Ariyamangalam, Trichy - 620010.</p>
-                <p className="text-sm">HP: 95850 71712, 96264 00785</p>
+                <h2 className="text-3xl font-extrabold text-gray-800">Nagu Car Spa</h2>
+                <p className="text-sm">No.1, Thirumurugan Nagar, Near J.K. Nagar,</p>
+                <p className="text-sm">Khajamalai, Trichy - 23.</p>
+                <p className="text-sm">HP: 81221 91515</p>
               </div>
             </div>
             <div className="text-right">
@@ -253,7 +253,7 @@ export function BillView({
               </div>
             </div>
             <div className="mt-12 text-right">
-              <p className="font-bold">For Nagu Enterprises</p>
+              <p className="font-bold">For Nagu Car Spa</p>
               <div className="mt-16 border-t border-dashed border-gray-500 pt-1 inline-block">
                 Authorized Signatory
               </div>
