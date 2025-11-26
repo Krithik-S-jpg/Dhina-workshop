@@ -103,7 +103,7 @@ function App() {
           item.service.id === service.id ? { ...item, quantity } : item
         );
       } else {
-        return [...prevItems, { service, quantity, selected: true, discountPercentage: service.discountPercentage }];
+        return [...prevItems, { service, quantity, selected: true, discountPercentage: service.discount_percentage }];
       }
     });
   };
