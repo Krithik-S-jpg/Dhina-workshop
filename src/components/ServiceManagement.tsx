@@ -21,6 +21,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     image: '',
     hsn_code: '',
     gst_percentage: 0,
+    discount_percentage: 0,
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -144,6 +145,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="number" placeholder="GST %" value={newService.gst_percentage} onChange={(e) => setNewService({ ...newService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="number" placeholder="Discount %" value={newService.discount_percentage} onChange={(e) => setNewService({ ...newService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -161,6 +163,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">HSN Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">GST %</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Discount %</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -172,6 +175,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.description}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.hsn_code}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.gst_percentage}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.discount_percentage ?? 0}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <button
@@ -208,6 +212,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="number" placeholder="GST %" value={editingService.gst_percentage} onChange={(e) => setEditingService({ ...editingService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="number" placeholder="Discount %" value={editingService.discount_percentage} onChange={(e) => setEditingService({ ...editingService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>
