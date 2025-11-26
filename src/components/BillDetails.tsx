@@ -47,7 +47,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
           <header className="flex justify-between items-start pb-4 border-b-2 border-gray-800">
             <div className="flex items-center">
               <div>
-                <h2 className="text-3xl font-extrabold text-gray-800">Nagu Car Spa</h2>
+                <h2 className="text-3xl font-extrabold text-gray-800">Dinna Automobile</h2>
                 <p className="text-sm">No.1, Thirumurugan Nagar, Near J.K. Nagar,</p>
                 <p className="text-sm">Khajamalai, Trichy - 23.</p>
                 <p className="text-sm">HP: 81221 91515</p>
@@ -159,7 +159,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
               </div>
             </div>
             <div className="mt-12 text-right">
-              <p className="font-bold">For Nagu Car Spa</p>
+              <p className="font-bold">For Dinna Automobile</p>
               <div className="mt-16 border-t border-dashed border-gray-500 pt-1 inline-block">
                 Authorized Signatory
               </div>

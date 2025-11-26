@@ -35,7 +35,7 @@ export function AdminLogin({ onBack, onLogin }: AdminLoginProps) {
 
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Nagu Car Spa - Admin Panel</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Dinna Automobile - Admin Panel</h1>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-8">
