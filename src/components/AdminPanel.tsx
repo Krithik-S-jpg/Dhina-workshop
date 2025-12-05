@@ -6,6 +6,8 @@ import { defaultGstPercentage } from '../data/mockData';
 import { ServiceManagement } from './ServiceManagement';
 import { Summary } from './Summary';
 import { Notifications } from './Notifications';
+import { ServiceCard } from './ServiceCard';
+import { serviceCategories } from '../data/categories';
 
 interface AdminPanelProps {
   services: Service[];
@@ -24,7 +26,8 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
   const [successMessage, setSuccessMessage] = useState('');
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
   const [isAddingNewCar, setIsAddingNewCar] = useState(false);
-    const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
+  const [inventorySelectedCategory, setInventorySelectedCategory] = useState<string | null>(null);
+  const [newCarModel, setNewCarModel] = useState<Partial<CarModel>>({
     name: '',
     brand: '',
   });
@@ -203,74 +206,104 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
         )}
 
         {activeTab === 'inventory' && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Inventory Levels</h3>
-              <button
-                onClick={() => {
-                  onUpdateServices(editableServices);
-                  setSuccessMessage('Stock updated successfully!');
-                  setTimeout(() => setSuccessMessage(''), 3000);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <Save className="w-4 h-4" />
-                <span>Save Changes</span>
-              </button>
-            </div>
-            {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
-                {successMessage}
+          <>
+            {!inventorySelectedCategory ? (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Select a Category</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                  {serviceCategories.map(category => (
+                    <ServiceCard
+                      key={category.category}
+                      title={category.title}
+                      image={category.image}
+                      category={category.category}
+                      onClick={() => setInventorySelectedCategory(category.category)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={() => setInventorySelectedCategory(null)}
+                      className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                      <span>Back to Categories</span>
+                    </button>
+                    <h3 className="text-lg font-semibold">Inventory Levels - {categoryOptions.find(opt => opt.value === inventorySelectedCategory)?.label}</h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      onUpdateServices(editableServices);
+                      setSuccessMessage('Stock updated successfully!');
+                      setTimeout(() => setSuccessMessage(''), 3000);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save Changes</span>
+                  </button>
+                </div>
+                {successMessage && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                    {successMessage}
+                  </div>
+                )}
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Service Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Category
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Stock Level
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {editableServices
+                        .filter(service => service.category === inventorySelectedCategory)
+                        .map(service => (
+                          <tr key={service.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-slate-900">{service.name}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {categoryOptions.find(opt => opt.value === service.category)?.label}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="number"
+                                value={service.stock ?? ''}
+                                onChange={(e) => {
+                                  const updatedServices = editableServices.map(s =>
+                                    s.id === service.id
+                                      ? { ...s, stock: e.target.value === '' ? undefined : Number(e.target.value) }
+                                      : s
+                                  );
+                                  setEditableServices(updatedServices);
+                                }}
+                                className="w-24 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="N/A"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
-            <div className="overflow-x-auto border rounded-lg">
-              <table className="w-full">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Service Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      Stock Level
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {editableServices.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-slate-900">{service.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {categoryOptions.find(opt => opt.value === service.category)?.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <input
-                          type="number"
-                          value={service.stock ?? ''}
-                          onChange={(e) => {
-                            const updatedServices = editableServices.map(s =>
-                              s.id === service.id
-                                ? { ...s, stock: e.target.value === '' ? undefined : Number(e.target.value) }
-                                : s
-                            );
-                            setEditableServices(updatedServices);
-                          }}
-                          className="w-24 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="N/A"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          </>
         )}
 
         {activeTab === 'cars' && (
