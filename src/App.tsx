@@ -27,10 +27,16 @@ function App() {
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
 
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState(true);
+
   useEffect(() => {
-    fetchServices();
-    fetchCarModels();
-    fetchSavedBills();
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      fetchServices();
+      fetchCarModels();
+      fetchSavedBills();
+    } else {
+      setIsSupabaseConnected(false);
+    }
   }, []);
 
   const fetchServices = async () => {
@@ -332,6 +338,13 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onAdminClick={handleAdminLogin} />
+
+      {!isSupabaseConnected && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+          <p className="font-bold">Database Not Connected</p>
+          <p>Please connect your Supabase database by setting the <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> environment variables. See <code>SUPABASE_SETUP.md</code> for instructions.</p>
+        </div>
+      )}
       
       <div className="bg-slate-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
