@@ -1,10 +1,24 @@
+export type Category =
+  | 'good-year'
+  | 'bridgestone'
+  | 'yokohama'
+  | 'continental'
+  | 'mrf'
+  | 'michelin'
+  | 'apollo'
+  | 'jk-tyre'
+  | 'ceat'
+  | 'firestone'
+  | 'pirelli';
+
 export interface Service {
   id: string;
   name: string;
   price: number;
   image: string;
   hsn_code: string;
-  category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
+  category: Category;
+  type?: 'tube' | 'tubeless';
   description?: string;
   stock?: number;
   discount_percentage?: number;

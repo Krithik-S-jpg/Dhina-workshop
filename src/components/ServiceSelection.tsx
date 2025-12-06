@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Service, CarModel, BillItem } from '../types';
+import { Service, CarModel, BillItem, Category } from '../types';
 
 interface ServiceSelectionProps {
-  category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
+  category: Category;
   services: Service[];
   carModels: CarModel[];
   onBack: () => void;
@@ -14,12 +14,18 @@ interface ServiceSelectionProps {
   isDiscountEnabled: boolean;
 }
 
-const categoryTitles = {
-  'wheel-alignment': 'Wheel Alignment',
-  'water-service': 'Water Services',
-  'car-accessories': 'Car Accessories',
-  'cng-lpg': 'CNG/LPG Services',
-  'ac-service': 'A/C Services',
+const categoryTitles: Record<Category, string> = {
+  'good-year': 'Good Year',
+  'bridgestone': 'Bridgestone',
+  'yokohama': 'Yokohama',
+  'continental': 'Continental',
+  'mrf': 'MRF',
+  'michelin': 'Michelin',
+  'apollo': 'Apollo',
+  'jk-tyre': 'JK Tyre',
+  'ceat': 'CEAT',
+  'firestone': 'Firestone',
+  'pirelli': 'Pirelli',
 };
 
 export function ServiceSelection({
@@ -35,8 +41,34 @@ export function ServiceSelection({
   isDiscountEnabled,
 }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
 
-  const categoryServices = services.filter(service => service.category === category);
+  const categoryServices = services.filter(service => {
+    const matchesCategory = service.category === category;
+    if (!matchesCategory) return false;
+
+    if (selectedSubCategory === 'all') return true;
+
+    // Check if service has explicit type or try to detect from name
+    if (service.type) {
+      return service.type === selectedSubCategory;
+    }
+
+    // Fallback: check name/description for keywords
+    const nameLower = service.name.toLowerCase();
+    const descLower = (service.description || '').toLowerCase();
+
+    if (selectedSubCategory === 'tube') {
+      return (nameLower.includes('tube') && !nameLower.includes('tubeless')) ||
+             (descLower.includes('tube') && !descLower.includes('tubeless'));
+    }
+
+    if (selectedSubCategory === 'tubeless') {
+      return nameLower.includes('tubeless') || descLower.includes('tubeless');
+    }
+
+    return true;
+  });
 
   const handleViewBill = () => {
     onViewBill(selectedCarModel);
@@ -82,7 +114,43 @@ export function ServiceSelection({
                 {categoryTitles[category]}
               </h2>
 
+              <div className="flex justify-center space-x-4 mb-8">
+                <button
+                  onClick={() => setSelectedSubCategory('all')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setSelectedSubCategory('tube')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'tube'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Tube
+                </button>
+                <button
+                  onClick={() => setSelectedSubCategory('tubeless')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'tubeless'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Tubeless
+                </button>
+              </div>
+
               <div className="space-y-4">
+                {categoryServices.length === 0 ? (
+                    <p className="text-center text-gray-500">No tyres found for this selection.</p>
+                ) : null}
                 {categoryServices.map(service => {
                   const billItem = billItems.find(item => item.service.id === service.id);
                   const quantity = billItem ? billItem.quantity : 0;

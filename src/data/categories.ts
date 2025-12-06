@@ -1,7 +1,13 @@
 export const serviceCategories = [
-  { title: 'Wheel Alignment', image: 'https://images.pexels.com/photos/3806288/pexels-photo-3806288.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'wheel-alignment' as const },
-  { title: 'Water Service', image: 'https://images.pexels.com/photos/13065690/pexels-photo-13065690.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'water-service' as const },
-  { title: 'Car Accessories', image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'car-accessories' as const },
-  { title: 'CNG/LPG Service', image: 'https://images.pexels.com/photos/4489702/pexels-photo-4489702.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'cng-lpg' as const },
-  { title: 'A/C Service', image: 'https://images.pexels.com/photos/3807277/pexels-photo-3807277.jpeg?auto=compress&cs=tinysrgb&w=500', category: 'ac-service' as const },
+  { title: 'Good Year', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'good-year' as const },
+  { title: 'Bridgestone', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'bridgestone' as const },
+  { title: 'Yokohama', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'yokohama' as const },
+  { title: 'Continental', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'continental' as const },
+  { title: 'MRF', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'mrf' as const },
+  { title: 'Michelin', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'michelin' as const },
+  { title: 'Apollo', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'apollo' as const },
+  { title: 'JK Tyre', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'jk-tyre' as const },
+  { title: 'CEAT', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'ceat' as const },
+  { title: 'Firestone', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'firestone' as const },
+  { title: 'Pirelli', image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80&w=500', category: 'pirelli' as const },
 ];
