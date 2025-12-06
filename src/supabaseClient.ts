@@ -10,12 +10,32 @@ const createMockClient = () => {
   const getTable = (table: string) => JSON.parse(localStorage.getItem(table) || '[]');
   const setTable = (table: string, data: any[]) => localStorage.setItem(table, JSON.stringify(data));
 
-  // Seed initial services if empty
-  const services = getTable('services');
-  if (services.length === 0) {
-    // We can leave it empty or maybe seed it later if needed.
-    // For now, let's just ensure the table exists.
-    setTable('services', []);
+  // Seed initial data if empty
+  if (getTable('car_models').length === 0) {
+    const initialCarModels = [
+      { id: '1', name: 'Maruti Swift', brand: 'Maruti Suzuki' },
+      { id: '2', name: 'Hyundai Creta', brand: 'Hyundai' },
+      { id: '3', name: 'Honda City', brand: 'Honda' },
+      { id: '4', name: 'Toyota Innova', brand: 'Toyota' },
+      { id: '5', name: 'Mahindra Thar', brand: 'Mahindra' },
+    ];
+    setTable('car_models', initialCarModels);
+  }
+
+  if (getTable('services').length === 0) {
+    const initialServices = [
+      // Good Year
+      { id: '101', name: 'Good Year Assurance 185/65 R15', price: 5200, category: 'good-year', type: 'tubeless', description: 'TripleMax 2 Tubeless', hsn_code: '4011', gst_percentage: 28, discount_percentage: 0 },
+      { id: '102', name: 'Good Year Kelly 165/80 R14', price: 3400, category: 'good-year', type: 'tube', description: 'Standard Tube Tyre', hsn_code: '4011', gst_percentage: 28, discount_percentage: 0 },
+      // Bridgestone
+      { id: '201', name: 'Bridgestone Sturdo 195/55 R16', price: 7800, category: 'bridgestone', type: 'tubeless', description: 'Long life tyre', hsn_code: '4011', gst_percentage: 28, discount_percentage: 5 },
+      // MRF
+      { id: '301', name: 'MRF ZVTV 175/65 R14', price: 4100, category: 'mrf', type: 'tubeless', description: 'Stock replacement', hsn_code: '4011', gst_percentage: 28, discount_percentage: 0 },
+      { id: '302', name: 'MRF Wanderer 215/75 R15', price: 6500, category: 'mrf', type: 'tube', description: 'All terrain tube type', hsn_code: '4011', gst_percentage: 28, discount_percentage: 0 },
+      // Michelin
+      { id: '401', name: 'Michelin Primacy 4ST', price: 9200, category: 'michelin', type: 'tubeless', description: 'Premium comfort', hsn_code: '4011', gst_percentage: 28, discount_percentage: 2 },
+    ];
+    setTable('services', initialServices);
   }
 
   return {
@@ -59,7 +79,7 @@ const createMockClient = () => {
           if (result.data && Array.isArray(result.data) && result.data.length > 0) {
             return { data: result.data[0], error: null };
           }
-           if (result.data && !Array.isArray(result.data)) { // Insert might return object directly if we mocked it that way, but let's be consistent
+           if (result.data && !Array.isArray(result.data)) {
              return { data: result.data, error: null };
           }
           return { data: null, error: { message: 'No rows found' } };
@@ -81,7 +101,7 @@ const createMockClient = () => {
                        bill_items: billItems.filter((item: any) => item.bill_id === bill.id)
                    }));
                }
-               // Handle filtering if match was called (though usually match comes after operation in supabase js for update/delete, but fetch can have eq)
+
                if (pendingFilter) {
                    data = data.filter((row: any) => {
                        return Object.keys(pendingFilter).every(key => row[key] === pendingFilter[key]);
@@ -100,7 +120,7 @@ const createMockClient = () => {
                         return row;
                    });
                    setTable(table, updated);
-                   // Retrieve updated rows for return
+
                     resultData = updated.filter((row: any) =>
                         Object.keys(pendingFilter).every(key => row[key] === pendingFilter[key])
                     );
@@ -124,7 +144,7 @@ const createMockClient = () => {
                     }
                 });
                 setTable(table, newData);
-                resultData = rows; // simplified
+                resultData = rows;
            }
 
            return { data: resultData, error: null };

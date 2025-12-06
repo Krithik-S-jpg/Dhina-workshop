@@ -40,7 +40,7 @@ export function ServiceSelection({
   gstPercentage,
   isDiscountEnabled,
 }: ServiceSelectionProps) {
-  const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
+  const [selectedCarModel, setSelectedCarModel] = useState<CarModel | undefined>(carModels[0]);
   const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
 
   const categoryServices = services.filter(service => {
@@ -71,7 +71,9 @@ export function ServiceSelection({
   });
 
   const handleViewBill = () => {
-    onViewBill(selectedCarModel);
+    if (selectedCarModel) {
+      onViewBill(selectedCarModel);
+    }
   };
 
   const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
@@ -214,20 +216,24 @@ export function ServiceSelection({
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Car Model:
                 </label>
-                <select
-                  value={selectedCarModel.id}
-                  onChange={(e) => {
-                    const model = carModels.find(m => m.id === e.target.value);
-                    if (model) setSelectedCarModel(model);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {carModels.map(model => (
-                    <option key={model.id} value={model.id}>
-                      {model.name}
-                    </option>
-                  ))}
-                </select>
+                {carModels.length > 0 ? (
+                  <select
+                    value={selectedCarModel?.id || ''}
+                    onChange={(e) => {
+                      const model = carModels.find(m => m.id === e.target.value);
+                      if (model) setSelectedCarModel(model);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {carModels.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-sm text-red-500">No car models available.</p>
+                )}
               </div>
 
               {billItems.length > 0 ? (
@@ -266,7 +272,8 @@ export function ServiceSelection({
                     </div>
                     <button
                       onClick={handleViewBill}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                      disabled={!selectedCarModel}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       <span>Proceed to Bill</span>
