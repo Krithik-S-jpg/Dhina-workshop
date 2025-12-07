@@ -26,8 +26,16 @@ function App() {
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
+  const [stockNotificationLimit, setStockNotificationLimit] = useState(() => {
+    const saved = localStorage.getItem('stockNotificationLimit');
+    return saved ? parseInt(saved, 10) : 200;
+  });
 
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem('stockNotificationLimit', stockNotificationLimit.toString());
+  }, [stockNotificationLimit]);
 
   useEffect(() => {
     if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
@@ -282,6 +290,7 @@ function App() {
         onUpdateCarModels={handleUpdateCarModels}
         onViewBillRecords={handleViewBillRecords}
         onNavigateToSettings={handleNavigateToSettings}
+        stockNotificationLimit={stockNotificationLimit}
       />
     );
   }
@@ -294,6 +303,8 @@ function App() {
         setIsGstEnabled={setIsGstEnabled}
         isDiscountEnabled={isDiscountEnabled}
         setIsDiscountEnabled={setIsDiscountEnabled}
+        stockNotificationLimit={stockNotificationLimit}
+        setStockNotificationLimit={setStockNotificationLimit}
       />
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Shield, Percent } from 'lucide-react';
+import { ArrowLeft, Shield, Percent, Bell } from 'lucide-react';
 
 interface AdminSettingsProps {
   onBack: () => void;
@@ -7,6 +7,8 @@ interface AdminSettingsProps {
   setIsGstEnabled: (value: boolean) => void;
   isDiscountEnabled: boolean;
   setIsDiscountEnabled: (value: boolean) => void;
+  stockNotificationLimit: number;
+  setStockNotificationLimit: (value: number) => void;
 }
 
 export function AdminSettings({
@@ -15,6 +17,8 @@ export function AdminSettings({
   setIsGstEnabled,
   isDiscountEnabled,
   setIsDiscountEnabled,
+  stockNotificationLimit,
+  setStockNotificationLimit,
 }: AdminSettingsProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -105,6 +109,30 @@ export function AdminSettings({
               >
                 <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isDiscountEnabled ? 'translate-x-7' : 'translate-x-1'}`}></span>
               </div>
+            </div>
+          </div>
+
+          {/* Notification Settings */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <Bell className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-slate-800">Notification Settings</h2>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Low Stock Warning Limit
+              </label>
+              <p className="text-sm text-slate-500 mb-3">
+                Services with stock below this number will appear in the notifications tab.
+              </p>
+              <input
+                type="number"
+                value={stockNotificationLimit}
+                onChange={(e) => setStockNotificationLimit(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min="0"
+                data-testid="stock-limit-input"
+              />
             </div>
           </div>
 

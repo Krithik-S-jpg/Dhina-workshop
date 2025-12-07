@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
 import { Service, CarModel, SavedBill } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
 import { ServiceManagement } from './ServiceManagement';
 import { Summary } from './Summary';
@@ -18,9 +17,10 @@ interface AdminPanelProps {
   onUpdateCarModels: (carModels: CarModel[]) => void;
   onViewBillRecords: () => void;
   onNavigateToSettings: () => void;
+  stockNotificationLimit: number;
 }
 
-export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings, stockNotificationLimit }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
@@ -32,7 +32,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
     brand: '',
   });
 
-  const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < 200);
+  const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < stockNotificationLimit);
 
   useEffect(() => {
     setEditableServices(services);
