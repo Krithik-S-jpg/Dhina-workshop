@@ -18,9 +18,10 @@ interface AdminPanelProps {
   onUpdateCarModels: (carModels: CarModel[]) => void;
   onViewBillRecords: () => void;
   onNavigateToSettings: () => void;
+  stockNotificationLimit: number;
 }
 
-export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings, stockNotificationLimit }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
@@ -32,7 +33,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
     brand: '',
   });
 
-  const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < 200);
+  const lowStockServices = services.filter(service => service.stock !== undefined && service.stock < stockNotificationLimit);
 
   useEffect(() => {
     setEditableServices(services);
