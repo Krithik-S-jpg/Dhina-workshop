@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Search } from 'lucide-react';
 import { Service, CarModel, BillItem, Category } from '../types';
 
 interface ServiceSelectionProps {
@@ -12,6 +12,7 @@ interface ServiceSelectionProps {
   onBillItemChange: (service: Service, quantity: number) => void;
   isGstEnabled: boolean;
   isDiscountEnabled: boolean;
+  gstPercentage?: number;
 }
 
 const categoryTitles: Record<Category, string> = {
@@ -42,19 +43,26 @@ export function ServiceSelection({
 }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel | undefined>(carModels[0]);
   const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categoryServices = services.filter(service => {
     const matchesCategory = service.category === category;
     if (!matchesCategory) return false;
 
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        service.name.toLowerCase().includes(query) ||
+        (service.description || '').toLowerCase().includes(query);
+      if (!matchesSearch) return false;
+    }
+
     if (selectedSubCategory === 'all') return true;
 
-    // Check if service has explicit type or try to detect from name
     if (service.type) {
       return service.type === selectedSubCategory;
     }
 
-    // Fallback: check name/description for keywords
     const nameLower = service.name.toLowerCase();
     const descLower = (service.description || '').toLowerCase();
 
@@ -115,6 +123,19 @@ export function ServiceSelection({
               <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">
                 {categoryTitles[category]}
               </h2>
+
+              <div className="mb-6 relative max-w-md mx-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search tyres..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
               <div className="flex justify-center space-x-4 mb-8">
                 <button
