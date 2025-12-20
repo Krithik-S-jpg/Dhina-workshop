@@ -27,6 +27,7 @@ function App() {
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
+  const [isHsnCodeEnabled, setIsHsnCodeEnabled] = useState(true);
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
@@ -284,6 +285,8 @@ function App() {
         onNavigateToSettings={handleNavigateToSettings}
         employees={employees}
         onUpdateEmployees={fetchEmployees}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        setIsHsnCodeEnabled={setIsHsnCodeEnabled}
       />
     );
   }
@@ -296,6 +299,8 @@ function App() {
         setIsGstEnabled={setIsGstEnabled}
         isDiscountEnabled={isDiscountEnabled}
         setIsDiscountEnabled={setIsDiscountEnabled}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        setIsHsnCodeEnabled={setIsHsnCodeEnabled}
       />
     );
   }
@@ -305,7 +310,7 @@ function App() {
   }
 
   if (currentView === 'bill-details' && billToView) {
-    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} isGstEnabled={isGstEnabled} />;
+    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} isGstEnabled={isGstEnabled} isHsnCodeEnabled={isHsnCodeEnabled} />;
   }
 
   if (currentView === 'service-selection') {
@@ -333,6 +338,7 @@ function App() {
         onSaveBill={handleSaveBill}
         isGstEnabled={isGstEnabled}
         isDiscountEnabled={isDiscountEnabled}
+        isHsnCodeEnabled={isHsnCodeEnabled}
       />
     );
   }

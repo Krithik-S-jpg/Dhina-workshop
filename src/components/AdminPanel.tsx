@@ -21,9 +21,11 @@ interface AdminPanelProps {
   onNavigateToSettings: () => void;
   employees: Employee[];
   onUpdateEmployees: () => void;
+  isHsnCodeEnabled: boolean;
+  setIsHsnCodeEnabled: (value: boolean) => void;
 }
 
-export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings, employees, onUpdateEmployees }: AdminPanelProps) {
+export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings, employees, onUpdateEmployees, isHsnCodeEnabled, setIsHsnCodeEnabled }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications' | 'attendance'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
@@ -209,7 +211,7 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
         )}
 
         {activeTab === 'services' && (
-          <ServiceManagement services={services} onUpdateServices={onUpdateServices} />
+          <ServiceManagement services={services} onUpdateServices={onUpdateServices} isHsnCodeEnabled={isHsnCodeEnabled} />
         )}
 
         {activeTab === 'summary' && (

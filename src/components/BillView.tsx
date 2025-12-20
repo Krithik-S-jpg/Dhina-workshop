@@ -9,6 +9,7 @@ interface BillViewProps {
   onSaveBill: (bill: SavedBill) => void;
   isGstEnabled: boolean;
   isDiscountEnabled: boolean;
+  isHsnCodeEnabled: boolean;
 }
 
 export function BillView({
@@ -18,6 +19,7 @@ export function BillView({
   onSaveBill,
   isGstEnabled,
   isDiscountEnabled,
+  isHsnCodeEnabled,
 }: BillViewProps) {
   const [customerName, setCustomerName] = useState('CUSTOMER NAME');
   const [customerAddress, setCustomerAddress] = useState('CUSTOMER ADDRESS');
@@ -174,7 +176,7 @@ export function BillView({
                 <tr className="bg-gray-200">
                   <th className="border border-gray-400 p-2">S.No</th>
                   <th className="border border-gray-400 p-2 text-left">Description</th>
-                  <th className="border border-gray-400 p-2">HSN Code</th>
+                  {isHsnCodeEnabled && <th className="border border-gray-400 p-2">HSN Code</th>}
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
                   {isDiscountEnabled && <th className="border border-gray-400 p-2">Discount</th>}
@@ -187,7 +189,7 @@ export function BillView({
                   <tr key={item.service.id}>
                     <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                     <td className="border border-gray-400 p-2">{item.service.name}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.service.hsn_code}</td>
+                    {isHsnCodeEnabled && <td className="border border-gray-400 p-2 text-center">{item.service.hsn_code}</td>}
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
                     {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}

@@ -6,9 +6,10 @@ interface BillDetailsProps {
   bill: SavedBill;
   onBack: () => void;
   isGstEnabled: boolean;
+  isHsnCodeEnabled: boolean;
 }
 
-export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
+export function BillDetails({ bill, onBack, isGstEnabled, isHsnCodeEnabled }: BillDetailsProps) {
 
   const numberToWords = (num: number): string => {
     const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
@@ -82,7 +83,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                 <tr className="bg-gray-200">
                   <th className="border border-gray-400 p-2">S.No</th>
                   <th className="border border-gray-400 p-2 text-left">Description</th>
-                  <th className="border border-gray-400 p-2">HSN Code</th>
+                  {isHsnCodeEnabled && <th className="border border-gray-400 p-2">HSN Code</th>}
                   <th className="border border-gray-400 p-2">Qty</th>
                   <th className="border border-gray-400 p-2">Rate</th>
                   {isGstEnabled && <th colSpan={2} className="border border-gray-400 p-2">GST</th>}
@@ -102,7 +103,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                   <tr key={index}>
                     <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                     <td className="border border-gray-400 p-2">{item.description}</td>
-                    <td className="border border-gray-400 p-2 text-center">{item.hsnCode}</td>
+                    {isHsnCodeEnabled && <td className="border border-gray-400 p-2 text-center">{item.hsnCode}</td>}
                     <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
                     <td className="border border-gray-400 p-2 text-right">{item.rate.toFixed(2)}</td>
                     {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(item.taxPercentage / 2).toFixed(2)}%</td>}
@@ -114,7 +115,7 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                   <tr key={`empty-${i}`}>
                     <td className="border border-gray-400 p-2 h-8"></td>
                     <td className="border border-gray-400 p-2"></td>
-                    <td className="border border-gray-400 p-2"></td>
+                    {isHsnCodeEnabled && <td className="border border-gray-400 p-2"></td>}
                     <td className="border border-gray-400 p-2"></td>
                     <td className="border border-gray-400 p-2"></td>
                     {isGstEnabled && <td className="border border-gray-400 p-2"></td>}

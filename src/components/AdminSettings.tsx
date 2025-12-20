@@ -7,6 +7,8 @@ interface AdminSettingsProps {
   setIsGstEnabled: (value: boolean) => void;
   isDiscountEnabled: boolean;
   setIsDiscountEnabled: (value: boolean) => void;
+  isHsnCodeEnabled: boolean;
+  setIsHsnCodeEnabled: (value: boolean) => void;
 }
 
 export function AdminSettings({
@@ -15,6 +17,8 @@ export function AdminSettings({
   setIsGstEnabled,
   isDiscountEnabled,
   setIsDiscountEnabled,
+  isHsnCodeEnabled,
+  setIsHsnCodeEnabled,
 }: AdminSettingsProps) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -86,6 +90,24 @@ export function AdminSettings({
                 data-testid="gst-toggle"
               >
                 <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isGstEnabled ? 'translate-x-7' : 'translate-x-1'}`}></span>
+              </div>
+            </div>
+          </div>
+
+          {/* HSN Code Settings */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <FileText className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-slate-800">HSN Code Configuration</h2>
+            </div>
+            <div className="flex items-center justify-between">
+              <label htmlFor="hsn-toggle" className="text-slate-700 font-medium">Enable HSN Code</label>
+              <div
+                onClick={() => setIsHsnCodeEnabled(!isHsnCodeEnabled)}
+                className={`relative w-14 h-8 flex items-center rounded-full cursor-pointer transition-colors ${isHsnCodeEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
+                data-testid="hsn-toggle"
+              >
+                <span className={`inline-block w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isHsnCodeEnabled ? 'translate-x-7' : 'translate-x-1'}`}></span>
               </div>
             </div>
           </div>
