@@ -395,7 +395,7 @@ function App() {
         </div>
       </div>
 
-      {currentView === 'home' && <AttendanceWidget employees={employees} />}
+      {currentView === 'home' && employees.length > 0 && <AttendanceWidget employees={employees} />}
     </div>
   );
 }
