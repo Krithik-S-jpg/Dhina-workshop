@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight } from 'lucide-react';
-import { Service, CarModel, SavedBill } from '../types';
+import { ArrowLeft, Plus, Edit2, Trash2, Save, X, Percent, Car, FileText, ArrowRight, UserCheck } from 'lucide-react';
+import { Service, CarModel, SavedBill, Employee } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultGstPercentage } from '../data/mockData';
 import { ServiceManagement } from './ServiceManagement';
+import { AdminAttendance } from './AdminAttendance';
 import { Summary } from './Summary';
 import { Notifications } from './Notifications';
 import { ServiceCard } from './ServiceCard';
@@ -18,10 +19,12 @@ interface AdminPanelProps {
   onUpdateCarModels: (carModels: CarModel[]) => void;
   onViewBillRecords: () => void;
   onNavigateToSettings: () => void;
+  employees: Employee[];
+  onUpdateEmployees: () => void;
 }
 
-export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications'>('services');
+export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateServices, onUpdateCarModels, onViewBillRecords, onNavigateToSettings, employees, onUpdateEmployees }: AdminPanelProps) {
+  const [activeTab, setActiveTab] = useState<'services' | 'cars' | 'inventory' | 'summary' | 'notifications' | 'attendance'>('services');
   const [editableServices, setEditableServices] = useState<Service[]>(services);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingCarModel, setEditingCarModel] = useState<CarModel | null>(null);
@@ -164,6 +167,16 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
               )}
             </button>
             <button
+              onClick={() => setActiveTab('attendance')}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'attendance'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Attendance
+            </button>
+            <button
               onClick={onNavigateToSettings}
               className={`flex-1 py-4 px-6 text-center font-medium transition-colors text-gray-600 hover:text-blue-600`}
               data-testid="settings-button"
@@ -174,24 +187,26 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
         </div>
 
         {/* Bill Management Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <FileText className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">Bill Management</h3>
+        {activeTab !== 'attendance' && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <FileText className="w-6 h-6 text-blue-600" />
+                <h3 className="text-lg font-semibold">Bill Management</h3>
+              </div>
+              <button
+                onClick={onViewBillRecords}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              >
+                <span>View All Bill Records</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={onViewBillRecords}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-            >
-              <span>View All Bill Records</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <p className="text-sm text-slate-600 mt-2">
+              View, search, and manage all saved bill records.
+            </p>
           </div>
-          <p className="text-sm text-slate-600 mt-2">
-            View, search, and manage all saved bill records.
-          </p>
-        </div>
+        )}
 
         {activeTab === 'services' && (
           <ServiceManagement services={services} onUpdateServices={onUpdateServices} />
@@ -203,6 +218,10 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
 
         {activeTab === 'notifications' && (
           <Notifications lowStockServices={lowStockServices} />
+        )}
+
+        {activeTab === 'attendance' && (
+          <AdminAttendance employees={employees} onUpdateEmployees={onUpdateEmployees} />
         )}
 
         {activeTab === 'inventory' && (

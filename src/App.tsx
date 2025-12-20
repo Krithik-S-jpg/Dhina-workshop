@@ -8,7 +8,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
 import { BillDetails } from './components/BillDetails';
-import { Service, CarModel, BillItem, SavedBill } from './types';
+import { AttendanceWidget } from './components/AttendanceWidget';
+import { Service, CarModel, BillItem, SavedBill, Employee } from './types';
 import { serviceCategories } from './data/categories';
 import { supabase } from './supabaseClient';
 
@@ -26,12 +27,20 @@ function App() {
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
     fetchServices();
     fetchCarModels();
     fetchSavedBills();
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase.from('employees').select('*');
+    if (error) console.error('Error fetching employees:', error);
+    else setEmployees(data as Employee[]);
+  };
 
   const fetchServices = async () => {
     const { data, error } = await supabase.from('services').select('*');
@@ -273,6 +282,8 @@ function App() {
         onUpdateCarModels={handleUpdateCarModels}
         onViewBillRecords={handleViewBillRecords}
         onNavigateToSettings={handleNavigateToSettings}
+        employees={employees}
+        onUpdateEmployees={fetchEmployees}
       />
     );
   }
@@ -383,6 +394,8 @@ function App() {
           </button>
         </div>
       </div>
+
+      {currentView === 'home' && <AttendanceWidget employees={employees} />}
     </div>
   );
 }
