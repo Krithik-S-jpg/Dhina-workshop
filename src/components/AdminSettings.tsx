@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Shield, Percent } from 'lucide-react';
+import { ArrowLeft, Shield, Percent, FileText } from 'lucide-react';
 
 interface AdminSettingsProps {
   onBack: () => void;
