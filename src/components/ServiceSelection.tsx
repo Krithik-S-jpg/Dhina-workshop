@@ -45,6 +45,7 @@ export function ServiceSelection({
   const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  console.log('ServiceSelection services:', services.length, services);
   const categoryServices = services.filter(service => {
     const matchesCategory = service.category === category;
     if (!matchesCategory) return false;
@@ -178,7 +179,7 @@ export function ServiceSelection({
                   const billItem = billItems.find(item => item.service.id === service.id);
                   const quantity = billItem ? billItem.quantity : 0;
                   const isSelected = quantity > 0;
-                  const canIncrease = service.stock === undefined || quantity < service.stock;
+                  const canIncrease = service.stock === undefined || service.stock === null || quantity < service.stock;
 
                   return (
                     <div
@@ -197,7 +198,7 @@ export function ServiceSelection({
                         {isDiscountEnabled && service.discountPercentage && (
                           <p className="text-xs text-green-600 font-semibold mt-1">{service.discountPercentage}% off</p>
                         )}
-                        {service.stock !== undefined && (
+                        {service.stock !== undefined && service.stock !== null && (
                           <p className={`text-xs mt-1 ${service.stock - quantity > 0 ? 'text-slate-500' : 'text-red-500'}`}>
                             {service.stock - quantity > 0 ? `${service.stock - quantity} left in stock` : 'Out of stock'}
                           </p>
