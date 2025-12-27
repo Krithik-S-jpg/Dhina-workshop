@@ -45,7 +45,6 @@ export function ServiceSelection({
   const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  console.log('ServiceSelection services:', services.length, services);
   const categoryServices = services.filter(service => {
     const matchesCategory = service.category === category;
     if (!matchesCategory) return false;
