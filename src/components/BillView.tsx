@@ -29,22 +29,44 @@ export function BillView({
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [isEditing, setIsEditing] = useState(true);
 
-  const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const totalDiscount = isDiscountEnabled ? billItems.reduce((sum, item) => {
-    const discount = (item.discountPercentage ?? 0) / 100;
-    return sum + (item.service.price * item.quantity * discount);
-  }, 0) : 0;
-  const totalAfterDiscount = subtotal - totalDiscount;
-  const gstAmount = isGstEnabled
-    ? billItems.reduce((sum, item) => {
-        const itemTotal = item.service.price * item.quantity;
-        const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
-        const priceAfterDiscount = itemTotal - discountAmount;
-        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
-        return sum + itemGst;
-      }, 0)
-    : 0;
-  const netAmount = totalAfterDiscount + gstAmount;
+  const calculateItemValues = (item: BillItem) => {
+    const grossRate = item.service.price; // Inclusive Rate
+    const qty = item.quantity;
+    const discountPct = isDiscountEnabled ? (item.discountPercentage ?? 0) : 0;
+    const gstPct = isGstEnabled ? (item.service.gst_percentage ?? 0) : 0;
+
+    // 1. Calculate Total Inclusive Amount for line item (after discount)
+    const discountAmount = grossRate * qty * (discountPct / 100);
+    const totalInclusive = (grossRate * qty) - discountAmount;
+
+    // 2. Extract Base Amount and GST Amount
+    // Formula: Inclusive = Base * (1 + GST%)  =>  Base = Inclusive / (1 + GST%)
+    const baseAmount = totalInclusive / (1 + gstPct / 100);
+    const gstAmount = totalInclusive - baseAmount;
+
+    // 3. Calculate Base Rate (per unit) for display
+    const baseRate = grossRate / (1 + gstPct / 100);
+
+    return {
+      grossRate,
+      baseRate,
+      baseAmount,
+      gstAmount,
+      totalInclusive,
+      gstPct,
+      discountPct
+    };
+  };
+
+  const totals = billItems.reduce((acc, item) => {
+    const values = calculateItemValues(item);
+    return {
+      subtotal: acc.subtotal + values.baseAmount,
+      gstAmount: acc.gstAmount + values.gstAmount,
+      netAmount: acc.netAmount + values.totalInclusive,
+      totalDiscount: acc.totalDiscount + (values.grossRate * item.quantity * (values.discountPct / 100))
+    };
+  }, { subtotal: 0, gstAmount: 0, netAmount: 0, totalDiscount: 0 });
 
   const billNumber = `B${Math.random().toString().substr(2, 6).toUpperCase()}`;
   const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -58,20 +80,23 @@ export function BillView({
       vehicleNumber: vehicleNumber,
       date: currentDate,
       gstNumber,
-      items: billItems.map(item => ({
-        description: item.service.name,
-        hsnCode: item.service.hsn_code,
-        quantity: item.quantity,
-        rate: item.service.price,
-        taxPercentage: item.service.gst_percentage ?? 0,
-        amount: item.service.price * item.quantity,
-        discountPercentage: item.discountPercentage,
-      })),
-      total: subtotal,
-      gstAmount,
-      sgst_amount: gstAmount / 2,
-      cgst_amount: gstAmount / 2,
-      netAmount,
+      items: billItems.map(item => {
+        const values = calculateItemValues(item);
+        return {
+          description: item.service.name,
+          hsnCode: item.service.hsn_code,
+          quantity: item.quantity,
+          rate: values.baseRate, // Saving Taxable Rate
+          taxPercentage: values.gstPct,
+          amount: values.baseAmount, // Saving Taxable Amount
+          discountPercentage: item.discountPercentage,
+        };
+      }),
+      total: totals.subtotal,
+      gstAmount: totals.gstAmount,
+      sgst_amount: totals.gstAmount / 2,
+      cgst_amount: totals.gstAmount / 2,
+      netAmount: totals.netAmount,
       paymentMethod,
     };
     onSaveBill(billToSave);
@@ -185,18 +210,21 @@ export function BillView({
                 </tr>
               </thead>
               <tbody>
-                {billItems.map((item, index) => (
-                  <tr key={item.service.id}>
-                    <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
-                    <td className="border border-gray-400 p-2">{item.service.name}</td>
-                    {isHsnCodeEnabled && <td className="border border-gray-400 p-2 text-center">{item.service.hsn_code}</td>}
-                    <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
-                    <td className="border border-gray-400 p-2 text-right">{item.service.price.toFixed(2)}</td>
-                    {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{item.discountPercentage ?? 0}%</td>}
-                    {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(item.service.gst_percentage ?? 0) / 2}%+{(item.service.gst_percentage ?? 0) / 2}%</td>}
-                    <td className="border border-gray-400 p-2 text-right">{(item.service.price * item.quantity).toFixed(2)}</td>
-                  </tr>
-                ))}
+                {billItems.map((item, index) => {
+                  const values = calculateItemValues(item);
+                  return (
+                    <tr key={item.service.id}>
+                      <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
+                      <td className="border border-gray-400 p-2">{item.service.name}</td>
+                      {isHsnCodeEnabled && <td className="border border-gray-400 p-2 text-center">{item.service.hsn_code}</td>}
+                      <td className="border border-gray-400 p-2 text-center">{item.quantity} Nos</td>
+                      <td className="border border-gray-400 p-2 text-right">{values.baseRate.toFixed(2)}</td>
+                      {isDiscountEnabled && <td className="border border-gray-400 p-2 text-center">{values.discountPct}%</td>}
+                      {isGstEnabled && <td className="border border-gray-400 p-2 text-center">{(values.gstPct / 2).toFixed(2)}%+{(values.gstPct / 2).toFixed(2)}%</td>}
+                      <td className="border border-gray-400 p-2 text-right">{values.baseAmount.toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </section>
@@ -212,29 +240,35 @@ export function BillView({
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span className="font-bold">Subtotal:</span>
-                    <span>{subtotal.toFixed(2)}</span>
+                    <span>{totals.subtotal.toFixed(2)}</span>
                   </div>
-                  {isDiscountEnabled && totalDiscount > 0 && (
+                  {/* Note: In inclusive logic, discount is applied before tax separation, so explicit discount line might be confusing if not careful.
+                      However, totalDiscount is the amount saved. */}
+                  {/* {isDiscountEnabled && totals.totalDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span className="font-bold">Discount:</span>
-                      <span>- {totalDiscount.toFixed(2)}</span>
+                      <span>- {totals.totalDiscount.toFixed(2)}</span>
                     </div>
-                  )}
+                  )} */}
+                  {/* Actually, subtotal here is Base Amount.
+                      Base Amount + GST = Net Amount.
+                      The user sees "Net Amount" matching their input price.
+                  */}
                   {isGstEnabled && (
                     <>
                       <div className="flex justify-between">
                         <span className="font-bold">SGST:</span>
-                        <span>{(gstAmount / 2).toFixed(2)}</span>
+                        <span>{(totals.gstAmount / 2).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-bold">CGST:</span>
-                        <span>{(gstAmount / 2).toFixed(2)}</span>
+                        <span>{(totals.gstAmount / 2).toFixed(2)}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between font-extrabold text-lg border-t-2 border-b-2 border-gray-800 my-1 py-1">
                     <span>Net Amount:</span>
-                    <span>{netAmount.toFixed(2)}</span>
+                    <span>{totals.netAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-bold">Payment Method:</span>
