@@ -23,6 +23,7 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
     hsn_code: '',
     gst_percentage: 0,
     discount_percentage: 0,
+    stock: 0,
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -60,15 +61,18 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
   };
 
   const handleAddNew = async () => {
-    if (newService.name && newService.price) {
+    if (newService.name && newService.price !== undefined && newService.price >= 0) {
       const { data, error } = await supabase.from('services').insert([newService]).select();
       if (error) {
         console.error('Error adding new service:', error);
+        alert('Error adding new service: ' + error.message);
       } else {
         onUpdateServices([...services, data[0] as Service]);
-        setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsn_code: '' });
+        setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsn_code: '', stock: 0 });
         setIsAddingNew(false);
       }
+    } else {
+      alert('Please enter a valid name and price.');
     }
   };
 
@@ -147,6 +151,7 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
             {isHsnCodeEnabled && <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />}
             <input type="number" placeholder="GST %" value={newService.gst_percentage} onChange={(e) => setNewService({ ...newService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="number" placeholder="Discount %" value={newService.discount_percentage} onChange={(e) => setNewService({ ...newService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="number" placeholder="Stock" value={newService.stock} onChange={(e) => setNewService({ ...newService, stock: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -214,6 +219,7 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
               {isHsnCodeEnabled && <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />}
               <input type="number" placeholder="GST %" value={editingService.gst_percentage} onChange={(e) => setEditingService({ ...editingService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="number" placeholder="Discount %" value={editingService.discount_percentage} onChange={(e) => setEditingService({ ...editingService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="number" placeholder="Stock" value={editingService.stock} onChange={(e) => setEditingService({ ...editingService, stock: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>
