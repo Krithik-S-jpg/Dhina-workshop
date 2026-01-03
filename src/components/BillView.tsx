@@ -234,7 +234,7 @@ export function BillView({
               <div className="w-2/3">
                 <p className="text-xs">E. & O.E.</p>
                 <p><span className="font-bold">Total Qty:</span> {billItems.reduce((sum, item) => sum + item.quantity, 0)}</p>
-                <p className="font-bold">Rupees {numberToWords(Math.round(netAmount))}</p>
+                <p className="font-bold">Rupees {numberToWords(Math.round(totals.netAmount))}</p>
               </div>
               <div className="w-1/3">
                 <div className="space-y-1">
