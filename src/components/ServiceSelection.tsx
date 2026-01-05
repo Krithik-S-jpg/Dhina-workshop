@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Search } from 'lucide-react';
 import { Service, CarModel, BillItem, Category } from '../types';
 
 interface ServiceSelectionProps {
@@ -12,6 +12,7 @@ interface ServiceSelectionProps {
   onBillItemChange: (service: Service, quantity: number) => void;
   isGstEnabled: boolean;
   isDiscountEnabled: boolean;
+  gstPercentage?: number;
 }
 
 const categoryTitles: Record<Category, string> = {
@@ -42,19 +43,26 @@ export function ServiceSelection({
 }: ServiceSelectionProps) {
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel | undefined>(carModels[0]);
   const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categoryServices = services.filter(service => {
     const matchesCategory = service.category === category;
     if (!matchesCategory) return false;
 
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        service.name.toLowerCase().includes(query) ||
+        (service.description || '').toLowerCase().includes(query);
+      if (!matchesSearch) return false;
+    }
+
     if (selectedSubCategory === 'all') return true;
 
-    // Check if service has explicit type or try to detect from name
     if (service.type) {
       return service.type === selectedSubCategory;
     }
 
-    // Fallback: check name/description for keywords
     const nameLower = service.name.toLowerCase();
     const descLower = (service.description || '').toLowerCase();
 
@@ -87,11 +95,12 @@ export function ServiceSelection({
         const itemTotal = item.service.price * item.quantity;
         const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
         const priceAfterDiscount = itemTotal - discountAmount;
-        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
+        const gstRate = item.service.gst_percentage ?? 0;
+        const itemGst = priceAfterDiscount - (priceAfterDiscount / (1 + gstRate / 100));
         return sum + itemGst;
       }, 0)
     : 0;
-  const finalTotal = totalAfterDiscount + gstAmount;
+  const finalTotal = totalAfterDiscount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -115,6 +124,19 @@ export function ServiceSelection({
               <h2 className="text-2xl font-bold text-center text-slate-800 mb-8">
                 {categoryTitles[category]}
               </h2>
+
+              <div className="mb-6 relative max-w-md mx-auto">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search tyres..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
               <div className="flex justify-center space-x-4 mb-8">
                 <button
@@ -157,7 +179,7 @@ export function ServiceSelection({
                   const billItem = billItems.find(item => item.service.id === service.id);
                   const quantity = billItem ? billItem.quantity : 0;
                   const isSelected = quantity > 0;
-                  const canIncrease = service.stock === undefined || quantity < service.stock;
+                  const canIncrease = service.stock === undefined || service.stock === null || quantity < service.stock;
 
                   return (
                     <div
@@ -176,7 +198,7 @@ export function ServiceSelection({
                         {isDiscountEnabled && service.discountPercentage && (
                           <p className="text-xs text-green-600 font-semibold mt-1">{service.discountPercentage}% off</p>
                         )}
-                        {service.stock !== undefined && (
+                        {service.stock !== undefined && service.stock !== null && (
                           <p className={`text-xs mt-1 ${service.stock - quantity > 0 ? 'text-slate-500' : 'text-red-500'}`}>
                             {service.stock - quantity > 0 ? `${service.stock - quantity} left in stock` : 'Out of stock'}
                           </p>
@@ -260,8 +282,8 @@ export function ServiceSelection({
                         </div>
                       )}
                       {isGstEnabled && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">GST:</span>
+                        <div className="flex justify-between items-center text-slate-500">
+                          <span className="text-sm">Includes GST:</span>
                           <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
                         </div>
                       )}
