@@ -95,11 +95,12 @@ export function ServiceSelection({
         const itemTotal = item.service.price * item.quantity;
         const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
         const priceAfterDiscount = itemTotal - discountAmount;
-        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
+        const gstRate = item.service.gst_percentage ?? 0;
+        const itemGst = priceAfterDiscount - (priceAfterDiscount / (1 + gstRate / 100));
         return sum + itemGst;
       }, 0)
     : 0;
-  const finalTotal = totalAfterDiscount + gstAmount;
+  const finalTotal = totalAfterDiscount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -281,8 +282,8 @@ export function ServiceSelection({
                         </div>
                       )}
                       {isGstEnabled && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">GST:</span>
+                        <div className="flex justify-between items-center text-slate-500">
+                          <span className="text-sm">Includes GST:</span>
                           <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
                         </div>
                       )}

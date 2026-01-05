@@ -10,6 +10,20 @@ interface BillDetailsProps {
 
 export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
 
+  // Check if bill uses inclusive GST logic (heuristic: if Net Amount ~= Total - Discount, instead of Total - Discount + GST)
+  // Inclusive: Net = Total - Discount
+  // Exclusive: Net = Total - Discount + GST
+  // We check if abs(Net - (Total - Discount)) < 1 (allow small rounding error)
+  // Discount is not explicitly stored as a total, but we can infer or ignore if not available.
+  // Actually, we store total, gstAmount, netAmount.
+  // Inclusive: Net ~= Total. (If no discount)
+  // Exclusive: Net ~= Total + GST.
+
+  // Note: 'total' in savedBill is 'subtotal'.
+
+  // Let's assume inclusive if (Total + GST) is significantly larger than Net.
+  const isInclusive = Math.abs((bill.total + (bill.gstAmount || 0)) - bill.netAmount) > 1;
+
   const numberToWords = (num: number): string => {
     const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
     const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -141,12 +155,12 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                   </div>
                   {isGstEnabled && (
                     <>
-                      <div className="flex justify-between">
-                        <span className="font-bold">SGST:</span>
+                      <div className={`flex justify-between ${isInclusive ? 'text-gray-600 text-sm' : ''}`}>
+                        <span className={isInclusive ? '' : 'font-bold'}>{isInclusive ? 'Includes SGST:' : 'SGST:'}</span>
                         <span>{bill.sgst_amount?.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold">CGST:</span>
+                      <div className={`flex justify-between ${isInclusive ? 'text-gray-600 text-sm' : ''}`}>
+                        <span className={isInclusive ? '' : 'font-bold'}>{isInclusive ? 'Includes CGST:' : 'CGST:'}</span>
                         <span>{bill.cgst_amount?.toFixed(2)}</span>
                       </div>
                     </>

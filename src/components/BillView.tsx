@@ -38,11 +38,12 @@ export function BillView({
         const itemTotal = item.service.price * item.quantity;
         const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
         const priceAfterDiscount = itemTotal - discountAmount;
-        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
+        const gstRate = item.service.gst_percentage ?? 0;
+        const itemGst = priceAfterDiscount - (priceAfterDiscount / (1 + gstRate / 100));
         return sum + itemGst;
       }, 0)
     : 0;
-  const netAmount = totalAfterDiscount + gstAmount;
+  const netAmount = totalAfterDiscount;
 
   const billNumber = `B${Math.random().toString().substr(2, 6).toUpperCase()}`;
   const currentDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -220,12 +221,12 @@ export function BillView({
                   )}
                   {isGstEnabled && (
                     <>
-                      <div className="flex justify-between">
-                        <span className="font-bold">SGST:</span>
+                      <div className="flex justify-between text-gray-600 text-sm">
+                        <span>Includes SGST:</span>
                         <span>{(gstAmount / 2).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="font-bold">CGST:</span>
+                      <div className="flex justify-between text-gray-600 text-sm">
+                        <span>Includes CGST:</span>
                         <span>{(gstAmount / 2).toFixed(2)}</span>
                       </div>
                     </>
