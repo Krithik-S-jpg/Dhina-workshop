@@ -8,7 +8,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
 import { BillDetails } from './components/BillDetails';
-import { Service, CarModel, BillItem, SavedBill } from './types';
+import { Service, CarModel, BillItem, SavedBill, Category } from './types';
 import { serviceCategories } from './data/categories';
 import { supabase } from './supabaseClient';
 
@@ -16,7 +16,7 @@ type View = 'home' | 'service-selection' | 'bill' | 'admin-login' | 'admin-panel
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
-  const [selectedCategory, setSelectedCategory] = useState<'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service'>('water-service');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('good-year');
   const [billItems, setBillItems] = useState<BillItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCarModel, setSelectedCarModel] = useState<CarModel | null>(null);
@@ -27,10 +27,16 @@ function App() {
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
 
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState(true);
+
   useEffect(() => {
-    fetchServices();
-    fetchCarModels();
-    fetchSavedBills();
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      fetchServices();
+      fetchCarModels();
+      fetchSavedBills();
+    } else {
+      setIsSupabaseConnected(false);
+    }
   }, []);
 
   const fetchServices = async () => {
@@ -85,7 +91,7 @@ function App() {
   };
 
 
-  const handleServiceCardClick = (category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service') => {
+  const handleServiceCardClick = (category: Category) => {
     setSelectedCategory(category);
     setCurrentView('service-selection');
   };
@@ -252,10 +258,13 @@ function App() {
     if (cat.title.toLowerCase().includes(query)) {
       return true;
     }
-    return services.some(service =>
-      service.category === cat.category &&
-      service.name && service.name.toLowerCase().includes(query)
-    );
+    if (services.length > 0) {
+      return services.some(service =>
+        service.category === cat.category &&
+        service.name && service.name.toLowerCase().includes(query)
+      );
+    }
+    return true;
   });
 
   if (currentView === 'admin-login') {
@@ -329,15 +338,22 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onAdminClick={handleAdminLogin} />
+
+      {!isSupabaseConnected && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+          <p className="font-bold">Database Not Connected</p>
+          <p>Please connect your Supabase database by setting the <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> environment variables. See <code>SUPABASE_SETUP.md</code> for instructions.</p>
+        </div>
+      )}
       
       <div className="bg-slate-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Dhina Automobiles</h2>
+          <h2 className="text-4xl font-bold mb-4">SRI CHELLAM AUTOMOBILE</h2>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <span className="bg-blue-600 px-3 py-1 rounded-full">Wheel Alignment</span>
-            <span className="bg-blue-600 px-3 py-1 rounded-full">Car Wash</span>
-            <span className="bg-blue-600 px-3 py-1 rounded-full">CNG/LPG Service</span>
-            <span className="bg-blue-600 px-3 py-1 rounded-full">A/C Service</span>
+            <span className="bg-blue-600 px-3 py-1 rounded-full">Good Year</span>
+            <span className="bg-blue-600 px-3 py-1 rounded-full">Bridgestone</span>
+            <span className="bg-blue-600 px-3 py-1 rounded-full">Michelin</span>
+            <span className="bg-blue-600 px-3 py-1 rounded-full">MRF</span>
             <span className="bg-blue-600 px-3 py-1 rounded-full">Generate Bill</span>
             <span className="bg-blue-600 px-3 py-1 rounded-full">View Overall Bill</span>
           </div>

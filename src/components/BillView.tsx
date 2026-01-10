@@ -124,10 +124,10 @@ export function BillView({
             <div className="flex items-center">
               {/* <img src={logo} alt="Bull Logo" className="h-20 mr-4" /> */}
               <div>
-                <h2 className="text-3xl font-extrabold text-gray-800">Dhina Automobiles</h2>
+                <h2 className="text-3xl font-extrabold text-gray-800">SRI CHELLAM AUTOMOBILE</h2>
                 <p className="text-sm">No.1, Thirumurugan Nagar, Near J.K. Nagar,</p>
                 <p className="text-sm">Khajamalai, Trichy - 23.</p>
-                <p className="text-sm">HP: 81221 91515</p>
+                <p className="text-sm">GST: 33AGGPN1093C1ZS</p>
               </div>
             </div>
             <div className="text-right">
@@ -253,7 +253,7 @@ export function BillView({
               </div>
             </div>
             <div className="mt-12 text-right">
-              <p className="font-bold">For Dhina Automobiles</p>
+              <p className="font-bold">For SRI CHELLAM AUTOMOBILE</p>
               <div className="mt-16 border-t border-dashed border-gray-500 pt-1 inline-block">
                 Authorized Signatory
               </div>

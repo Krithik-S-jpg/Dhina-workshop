@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Service, CarModel, BillItem } from '../types';
+import { Service, CarModel, BillItem, Category } from '../types';
 
 interface ServiceSelectionProps {
-  category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
+  category: Category;
   services: Service[];
   carModels: CarModel[];
   onBack: () => void;
@@ -14,12 +14,18 @@ interface ServiceSelectionProps {
   isDiscountEnabled: boolean;
 }
 
-const categoryTitles = {
-  'wheel-alignment': 'Wheel Alignment',
-  'water-service': 'Water Services',
-  'car-accessories': 'Car Accessories',
-  'cng-lpg': 'CNG/LPG Services',
-  'ac-service': 'A/C Services',
+const categoryTitles: Record<Category, string> = {
+  'good-year': 'Good Year',
+  'bridgestone': 'Bridgestone',
+  'yokohama': 'Yokohama',
+  'continental': 'Continental',
+  'mrf': 'MRF',
+  'michelin': 'Michelin',
+  'apollo': 'Apollo',
+  'jk-tyre': 'JK Tyre',
+  'ceat': 'CEAT',
+  'firestone': 'Firestone',
+  'pirelli': 'Pirelli',
 };
 
 export function ServiceSelection({
@@ -34,12 +40,40 @@ export function ServiceSelection({
   gstPercentage,
   isDiscountEnabled,
 }: ServiceSelectionProps) {
-  const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
+  const [selectedCarModel, setSelectedCarModel] = useState<CarModel | undefined>(carModels[0]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<'tube' | 'tubeless' | 'all'>('all');
 
-  const categoryServices = services.filter(service => service.category === category);
+  const categoryServices = services.filter(service => {
+    const matchesCategory = service.category === category;
+    if (!matchesCategory) return false;
+
+    if (selectedSubCategory === 'all') return true;
+
+    // Check if service has explicit type or try to detect from name
+    if (service.type) {
+      return service.type === selectedSubCategory;
+    }
+
+    // Fallback: check name/description for keywords
+    const nameLower = service.name.toLowerCase();
+    const descLower = (service.description || '').toLowerCase();
+
+    if (selectedSubCategory === 'tube') {
+      return (nameLower.includes('tube') && !nameLower.includes('tubeless')) ||
+             (descLower.includes('tube') && !descLower.includes('tubeless'));
+    }
+
+    if (selectedSubCategory === 'tubeless') {
+      return nameLower.includes('tubeless') || descLower.includes('tubeless');
+    }
+
+    return true;
+  });
 
   const handleViewBill = () => {
-    onViewBill(selectedCarModel);
+    if (selectedCarModel) {
+      onViewBill(selectedCarModel);
+    }
   };
 
   const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
@@ -82,7 +116,43 @@ export function ServiceSelection({
                 {categoryTitles[category]}
               </h2>
 
+              <div className="flex justify-center space-x-4 mb-8">
+                <button
+                  onClick={() => setSelectedSubCategory('all')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setSelectedSubCategory('tube')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'tube'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Tube
+                </button>
+                <button
+                  onClick={() => setSelectedSubCategory('tubeless')}
+                  className={`px-4 py-2 rounded-full ${
+                    selectedSubCategory === 'tubeless'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Tubeless
+                </button>
+              </div>
+
               <div className="space-y-4">
+                {categoryServices.length === 0 ? (
+                    <p className="text-center text-gray-500">No tyres found for this selection.</p>
+                ) : null}
                 {categoryServices.map(service => {
                   const billItem = billItems.find(item => item.service.id === service.id);
                   const quantity = billItem ? billItem.quantity : 0;
@@ -146,20 +216,24 @@ export function ServiceSelection({
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Car Model:
                 </label>
-                <select
-                  value={selectedCarModel.id}
-                  onChange={(e) => {
-                    const model = carModels.find(m => m.id === e.target.value);
-                    if (model) setSelectedCarModel(model);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {carModels.map(model => (
-                    <option key={model.id} value={model.id}>
-                      {model.name}
-                    </option>
-                  ))}
-                </select>
+                {carModels.length > 0 ? (
+                  <select
+                    value={selectedCarModel?.id || ''}
+                    onChange={(e) => {
+                      const model = carModels.find(m => m.id === e.target.value);
+                      if (model) setSelectedCarModel(model);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {carModels.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-sm text-red-500">No car models available.</p>
+                )}
               </div>
 
               {billItems.length > 0 ? (
@@ -198,7 +272,8 @@ export function ServiceSelection({
                     </div>
                     <button
                       onClick={handleViewBill}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                      disabled={!selectedCarModel}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                     >
                       <ShoppingCart className="w-5 h-5" />
                       <span>Proceed to Bill</span>

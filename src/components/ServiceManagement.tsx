@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, ArrowLeft } from 'lucide-react';
-import { Service } from '../types';
+import { Service, Category } from '../types';
 import { ServiceCard } from './ServiceCard';
 import { serviceCategories } from '../data/categories';
 import { supabase } from '../supabaseClient';
@@ -16,7 +16,8 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
   const [newService, setNewService] = useState<Partial<Service>>({
     name: '',
     price: 0,
-    category: 'water-service',
+    category: 'good-year',
+    type: 'tube',
     description: '',
     image: '',
     hsn_code: '',
@@ -71,13 +72,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     }
   };
 
-  const categoryOptions = [
-    { value: 'water-service', label: 'Water Service' },
-    { value: 'wheel-alignment', label: 'Wheel Alignment' },
-    { value: 'car-accessories', label: 'Car Accessories' },
-    { value: 'cng-lpg', label: 'CNG/LPG Service' },
-    { value: 'ac-service', label: 'A/C Service' },
-  ];
+  const categoryOptions: { value: Category; label: string }[] = serviceCategories.map(c => ({
+    value: c.category as Category,
+    label: c.title
+  }));
 
   const filteredServices = services.filter(service =>
     service.category === selectedCategory &&
@@ -140,6 +138,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             <input type="number" placeholder="Price" value={newService.price} onChange={(e) => setNewService({ ...newService, price: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <select value={newService.category} onChange={(e) => setNewService({ ...newService, category: e.target.value as Service['category'] })} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
               {categoryOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+            <select value={newService.type} onChange={(e) => setNewService({ ...newService, type: e.target.value as 'tube' | 'tubeless' })} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option value="tube">Tube</option>
+              <option value="tubeless">Tubeless</option>
             </select>
             <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
@@ -207,6 +209,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               <input type="number" placeholder="Price" value={editingService.price} onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <select value={editingService.category} onChange={(e) => setEditingService({ ...editingService, category: e.target.value as Service['category'] })} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 {categoryOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+              <select value={editingService.type} onChange={(e) => setEditingService({ ...editingService, type: e.target.value as 'tube' | 'tubeless' })} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <option value="tube">Tube</option>
+                <option value="tubeless">Tubeless</option>
               </select>
               <input type="text" placeholder="Description" value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />

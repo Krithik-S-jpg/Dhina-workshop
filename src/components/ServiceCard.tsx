@@ -1,19 +1,26 @@
 import React from 'react';
-import { Wrench, Droplets, Package, Fuel, Snowflake } from 'lucide-react';
+import { Wrench, Droplets, Package, Fuel, Snowflake, Disc } from 'lucide-react';
+import { Category } from '../types';
 
 interface ServiceCardProps {
   title: string;
   image: string;
   onClick: () => void;
-  category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
+  category: Category;
 }
 
-const categoryIcons = {
-  'wheel-alignment': Wrench,
-  'water-service': Droplets,
-  'car-accessories': Package,
-  'cng-lpg': Fuel,
-  'ac-service': Snowflake,
+const categoryIcons: Record<Category, any> = {
+  'good-year': Disc,
+  'bridgestone': Disc,
+  'yokohama': Disc,
+  'continental': Disc,
+  'mrf': Disc,
+  'michelin': Disc,
+  'apollo': Disc,
+  'jk-tyre': Disc,
+  'ceat': Disc,
+  'firestone': Disc,
+  'pirelli': Disc,
 };
 
 export function ServiceCard({ title, image, onClick, category }: ServiceCardProps) {
