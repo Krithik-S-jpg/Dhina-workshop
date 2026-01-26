@@ -51,7 +51,7 @@ export function BillDetails({ bill, onBack, isGstEnabled, isHsnCodeEnabled }: Bi
                 <h2 className="text-3xl font-extrabold text-gray-800">Dhina Automobiles</h2>
                 <p className="text-sm">No.1, Thirumurugan Nagar, Near J.K. Nagar,</p>
                 <p className="text-sm">Khajamalai, Trichy - 23.</p>
-                <p className="text-sm">HP: 81221 91515</p>
+                <p className="text-sm">HP: 8608828088</p>
               </div>
             </div>
             <div className="text-right">

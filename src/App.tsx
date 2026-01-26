@@ -370,6 +370,7 @@ function App() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-3 rounded-full border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
             data-testid="service-search-input"
+            aria-label="Search categories or services"
           />
         </div>
 
