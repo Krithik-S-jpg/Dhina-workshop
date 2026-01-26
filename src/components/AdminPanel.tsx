@@ -258,7 +258,18 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
                   </div>
                   <button
                     onClick={() => {
-                      onUpdateServices(editableServices);
+                      const updatedServices = editableServices.map(editableService => {
+                        const originalService = services.find(s => s.id === editableService.id);
+                        if (originalService && editableService.stock !== originalService.stock) {
+                          return {
+                            ...editableService,
+                            old_stock: originalService.stock
+                          };
+                        }
+                        return editableService;
+                      });
+
+                      onUpdateServices(updatedServices);
                       setSuccessMessage('Stock updated successfully!');
                       setTimeout(() => setSuccessMessage(''), 3000);
                     }}
@@ -284,6 +295,9 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
                           Category
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Old Level
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Stock Level
                         </th>
                       </tr>
@@ -300,6 +314,9 @@ export function AdminPanel({ services, carModels, savedBills, onBack, onUpdateSe
                               <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                 {categoryOptions.find(opt => opt.value === service.category)?.label}
                               </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                              {service.old_stock ?? '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <input

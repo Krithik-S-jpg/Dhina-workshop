@@ -7,6 +7,7 @@ export interface Service {
   category: 'wheel-alignment' | 'water-service' | 'car-accessories' | 'cng-lpg' | 'ac-service';
   description?: string;
   stock?: number;
+  old_stock?: number;
   discount_percentage?: number;
   gst_percentage?: number;
 }
