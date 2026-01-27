@@ -34,9 +34,15 @@ export function ServiceSelection({
   gstPercentage,
   isDiscountEnabled,
 }: ServiceSelectionProps) {
-  const [selectedCarModel, setSelectedCarModel] = useState<CarModel>(carModels[0]);
+  const [selectedCarModel, setSelectedCarModel] = useState<CarModel | undefined>(carModels[0]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categoryServices = services.filter(service => service.category === category);
+
+  const filteredServices = categoryServices.filter(service =>
+    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (service.description && service.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   const handleViewBill = () => {
     onViewBill(selectedCarModel);
@@ -98,8 +104,19 @@ export function ServiceSelection({
                 {categoryTitles[category]}
               </h2>
 
+              <div className="mb-6">
+                <input
+                  type="text"
+                  placeholder="Search services..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  data-testid="service-selection-search-input"
+                />
+              </div>
+
               <div className="space-y-4">
-                {categoryServices.map(service => {
+                {filteredServices.map(service => {
                   const billItem = billItems.find(item => item.service.id === service.id);
                   const quantity = billItem ? billItem.quantity : 0;
                   const isSelected = quantity > 0;
@@ -163,7 +180,7 @@ export function ServiceSelection({
                   Car Model:
                 </label>
                 <select
-                  value={selectedCarModel.id}
+                  value={selectedCarModel?.id || ''}
                   onChange={(e) => {
                     const model = carModels.find(m => m.id === e.target.value);
                     if (model) setSelectedCarModel(model);
