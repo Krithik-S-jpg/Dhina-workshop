@@ -64,7 +64,6 @@ export function BillDetails({ bill, onBack, isGstEnabled }: BillDetailsProps) {
                 <h2 className="text-3xl font-extrabold text-gray-800">SRI CHELLAM AUTOMOBILE</h2>
                 <p className="text-sm">No.1, Thirumurugan Nagar, Near J.K. Nagar,</p>
                 <p className="text-sm">Khajamalai, Trichy - 23.</p>
-                <p className="text-sm">GST: 33AGGPN1093C1ZS</p>
               </div>
             </div>
             <div className="text-right">
