@@ -26,6 +26,7 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
     stock: 0,
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
+  const [categorySearchQuery, setCategorySearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handleEdit = (service: Service) => {
@@ -90,11 +91,25 @@ export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled
   );
 
   if (!selectedCategory) {
+    const filteredCategories = serviceCategories.filter(category =>
+      category.title.toLowerCase().includes(categorySearchQuery.toLowerCase())
+    );
+
     return (
       <div>
         <h2 className="text-2xl font-bold mb-6">Select a Category</h2>
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={categorySearchQuery}
+            onChange={(e) => setCategorySearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            data-testid="category-search-input"
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {serviceCategories.map(category => (
+          {filteredCategories.map(category => (
             <ServiceCard
               key={category.category}
               title={category.title}
