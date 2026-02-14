@@ -42,22 +42,38 @@ export function ServiceSelection({
     onViewBill(selectedCarModel);
   };
 
-  const subtotal = billItems.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-  const totalDiscount = billItems.reduce((sum, item) => {
-    const discount = (item.discountPercentage ?? 0) / 100;
-    return sum + (item.service.price * item.quantity * discount);
-  }, 0);
-  const totalAfterDiscount = subtotal - totalDiscount;
-  const gstAmount = isGstEnabled
-    ? billItems.reduce((sum, item) => {
-        const itemTotal = item.service.price * item.quantity;
-        const discountAmount = isDiscountEnabled ? itemTotal * ((item.discountPercentage ?? 0) / 100) : 0;
-        const priceAfterDiscount = itemTotal - discountAmount;
-        const itemGst = priceAfterDiscount * ((item.service.gst_percentage ?? 0) / 100);
-        return sum + itemGst;
-      }, 0)
-    : 0;
-  const finalTotal = totalAfterDiscount + gstAmount;
+  const calculateItemValues = (item: BillItem) => {
+    const grossRate = item.service.price; // Inclusive Rate
+    const qty = item.quantity;
+    const discountPct = isDiscountEnabled ? (item.discountPercentage ?? 0) : 0;
+    const gstPct = isGstEnabled ? (item.service.gst_percentage ?? 0) : 0;
+
+    // 1. Calculate Total Inclusive Amount for line item (after discount)
+    const discountAmount = grossRate * qty * (discountPct / 100);
+    const totalInclusive = (grossRate * qty) - discountAmount;
+
+    // 2. Extract Base Amount and GST Amount
+    // Formula: Inclusive = Base * (1 + GST%)  =>  Base = Inclusive / (1 + GST%)
+    const baseAmount = totalInclusive / (1 + gstPct / 100);
+    const gstAmount = totalInclusive - baseAmount;
+
+    return {
+      baseAmount,
+      gstAmount,
+      totalInclusive,
+      discountAmount
+    };
+  };
+
+  const totals = billItems.reduce((acc, item) => {
+    const values = calculateItemValues(item);
+    return {
+      subtotal: acc.subtotal + values.baseAmount,
+      gstAmount: acc.gstAmount + values.gstAmount,
+      netAmount: acc.netAmount + values.totalInclusive,
+      totalDiscount: acc.totalDiscount + values.discountAmount
+    };
+  }, { subtotal: 0, gstAmount: 0, netAmount: 0, totalDiscount: 0 });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -177,23 +193,23 @@ export function ServiceSelection({
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-600">Subtotal:</span>
-                        <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
+                        <span className="font-semibold">₹{totals.subtotal.toFixed(2)}</span>
                       </div>
-                      {isDiscountEnabled && totalDiscount > 0 && (
+                      {isDiscountEnabled && totals.totalDiscount > 0 && (
                         <div className="flex justify-between items-center text-green-600">
                           <span className="text-sm">Discount:</span>
-                          <span className="font-semibold">- ₹{totalDiscount.toFixed(2)}</span>
+                          <span className="font-semibold">- ₹{totals.totalDiscount.toFixed(2)}</span>
                         </div>
                       )}
                       {isGstEnabled && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-slate-600">GST:</span>
-                          <span className="font-semibold">₹{gstAmount.toFixed(2)}</span>
+                          <span className="font-semibold">₹{totals.gstAmount.toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                         <span className="text-lg font-semibold">Total:</span>
-                        <span className="text-2xl font-bold text-blue-600">₹{finalTotal.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-blue-600">₹{totals.netAmount.toFixed(2)}</span>
                       </div>
                     </div>
                     <button

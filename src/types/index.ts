@@ -61,3 +61,20 @@ export interface SavedBill {
   paymentMethod?: string;
   bill_items: any[];
 }
+
+export interface Employee {
+  id: string;
+  name: string;
+  role: string;
+  created_at?: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  employee_id: string;
+  employee_name?: string;
+  date: string;
+  time: string;
+  status: 'present' | 'absent';
+  created_at?: string;
+}

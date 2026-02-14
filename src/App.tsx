@@ -8,7 +8,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { AdminSettings } from './components/AdminSettings';
 import { BillRecords } from './components/BillRecords';
 import { BillDetails } from './components/BillDetails';
-import { Service, CarModel, BillItem, SavedBill } from './types';
+import { AttendanceWidget } from './components/AttendanceWidget';
+import { Service, CarModel, BillItem, SavedBill, Employee } from './types';
 import { serviceCategories } from './data/categories';
 import { supabase } from './supabaseClient';
 
@@ -26,12 +27,21 @@ function App() {
   const [billToView, setBillToView] = useState<SavedBill | null>(null);
   const [isGstEnabled, setIsGstEnabled] = useState(true);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState(true);
+  const [isHsnCodeEnabled, setIsHsnCodeEnabled] = useState(true);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
     fetchServices();
     fetchCarModels();
     fetchSavedBills();
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase.from('employees').select('*');
+    if (error) console.error('Error fetching employees:', error);
+    else setEmployees(data as Employee[]);
+  };
 
   const fetchServices = async () => {
     const { data, error } = await supabase.from('services').select('*');
@@ -273,6 +283,10 @@ function App() {
         onUpdateCarModels={handleUpdateCarModels}
         onViewBillRecords={handleViewBillRecords}
         onNavigateToSettings={handleNavigateToSettings}
+        employees={employees}
+        onUpdateEmployees={fetchEmployees}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        setIsHsnCodeEnabled={setIsHsnCodeEnabled}
       />
     );
   }
@@ -285,6 +299,8 @@ function App() {
         setIsGstEnabled={setIsGstEnabled}
         isDiscountEnabled={isDiscountEnabled}
         setIsDiscountEnabled={setIsDiscountEnabled}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        setIsHsnCodeEnabled={setIsHsnCodeEnabled}
       />
     );
   }
@@ -294,7 +310,7 @@ function App() {
   }
 
   if (currentView === 'bill-details' && billToView) {
-    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} isGstEnabled={isGstEnabled} />;
+    return <BillDetails bill={billToView} onBack={() => setCurrentView('bill-records')} isGstEnabled={isGstEnabled} isHsnCodeEnabled={isHsnCodeEnabled} />;
   }
 
   if (currentView === 'service-selection') {
@@ -322,6 +338,7 @@ function App() {
         onSaveBill={handleSaveBill}
         isGstEnabled={isGstEnabled}
         isDiscountEnabled={isDiscountEnabled}
+        isHsnCodeEnabled={isHsnCodeEnabled}
       />
     );
   }
@@ -383,6 +400,8 @@ function App() {
           </button>
         </div>
       </div>
+
+      {currentView === 'home' && employees.length > 0 && <AttendanceWidget employees={employees} />}
     </div>
   );
 }

@@ -8,9 +8,10 @@ import { supabase } from '../supabaseClient';
 interface ServiceManagementProps {
   services: Service[];
   onUpdateServices: (services: Service[]) => void;
+  isHsnCodeEnabled: boolean;
 }
 
-export function ServiceManagement({ services, onUpdateServices }: ServiceManagementProps) {
+export function ServiceManagement({ services, onUpdateServices, isHsnCodeEnabled }: ServiceManagementProps) {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newService, setNewService] = useState<Partial<Service>>({
@@ -22,6 +23,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
     hsn_code: '',
     gst_percentage: 0,
     discount_percentage: 0,
+    stock: 0,
   });
   const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -59,15 +61,18 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
   };
 
   const handleAddNew = async () => {
-    if (newService.name && newService.price) {
+    if (newService.name && newService.price !== undefined && newService.price >= 0) {
       const { data, error } = await supabase.from('services').insert([newService]).select();
       if (error) {
         console.error('Error adding new service:', error);
+        alert('Error adding new service: ' + error.message);
       } else {
         onUpdateServices([...services, data[0] as Service]);
-        setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsn_code: '' });
+        setNewService({ name: '', price: 0, category: 'water-service', description: '', image: '', hsn_code: '', stock: 0 });
         setIsAddingNew(false);
       }
+    } else {
+      alert('Please enter a valid name and price.');
     }
   };
 
@@ -143,9 +148,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
             </select>
             <input type="text" placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="text" placeholder="Image URL" value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-            <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            {isHsnCodeEnabled && <input type="text" placeholder="HSN Code" value={newService.hsn_code} onChange={(e) => setNewService({ ...newService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />}
             <input type="number" placeholder="GST %" value={newService.gst_percentage} onChange={(e) => setNewService({ ...newService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             <input type="number" placeholder="Discount %" value={newService.discount_percentage} onChange={(e) => setNewService({ ...newService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="number" placeholder="Stock" value={newService.stock} onChange={(e) => setNewService({ ...newService, stock: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div className="flex space-x-2 mt-4">
             <button onClick={handleAddNew} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Add</button>
@@ -161,7 +167,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">HSN Code</th>
+              {isHsnCodeEnabled && <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">HSN Code</th>}
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">GST %</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Discount %</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
@@ -173,7 +179,7 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{service.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">₹{service.price}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.hsn_code}</td>
+                {isHsnCodeEnabled && <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.hsn_code}</td>}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.gst_percentage}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{service.discount_percentage ?? 0}%</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -210,9 +216,10 @@ export function ServiceManagement({ services, onUpdateServices }: ServiceManagem
               </select>
               <input type="text" placeholder="Description" value={editingService.description} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="text" placeholder="Image URL" value={editingService.image} onChange={(e) => setEditingService({ ...editingService, image: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              {isHsnCodeEnabled && <input type="text" placeholder="HSN Code" value={editingService.hsn_code} onChange={(e) => setEditingService({ ...editingService, hsn_code: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />}
               <input type="number" placeholder="GST %" value={editingService.gst_percentage} onChange={(e) => setEditingService({ ...editingService, gst_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
               <input type="number" placeholder="Discount %" value={editingService.discount_percentage} onChange={(e) => setEditingService({ ...editingService, discount_percentage: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              <input type="number" placeholder="Stock" value={editingService.stock} onChange={(e) => setEditingService({ ...editingService, stock: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
             </div>
             <div className="flex space-x-2 mt-4">
               <button onClick={handleSave} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Save</button>
