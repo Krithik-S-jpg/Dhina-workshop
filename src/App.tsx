@@ -359,7 +359,7 @@ function App() {
       
       <div className="bg-slate-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">SRI CHELLAM AUTOMOBILE</h2>
+          <h2 className="text-4xl font-bold mb-4">SRI CHELLAM AUTOMOBILES</h2>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
             <span className="bg-blue-600 px-3 py-1 rounded-full">Good Year</span>
             <span className="bg-blue-600 px-3 py-1 rounded-full">Bridgestone</span>
