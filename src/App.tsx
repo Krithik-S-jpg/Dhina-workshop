@@ -348,7 +348,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onAdminClick={handleAdminLogin} />
+      <Header
+        onAdminClick={handleAdminLogin}
+        isGstEnabled={isGstEnabled}
+        onGstToggle={() => setIsGstEnabled(!isGstEnabled)}
+      />
 
       {!isSupabaseConnected && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
