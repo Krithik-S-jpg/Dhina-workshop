@@ -352,6 +352,8 @@ function App() {
         onAdminClick={handleAdminLogin}
         isGstEnabled={isGstEnabled}
         onGstToggle={() => setIsGstEnabled(!isGstEnabled)}
+        isDiscountEnabled={isDiscountEnabled}
+        onDiscountToggle={() => setIsDiscountEnabled(!isDiscountEnabled)}
       />
 
       {!isSupabaseConnected && (

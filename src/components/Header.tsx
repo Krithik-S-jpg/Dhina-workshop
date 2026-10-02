@@ -6,9 +6,18 @@ interface HeaderProps {
   showAdminButton?: boolean;
   isGstEnabled?: boolean;
   onGstToggle?: () => void;
+  isDiscountEnabled?: boolean;
+  onDiscountToggle?: () => void;
 }
 
-export function Header({ onAdminClick, showAdminButton = true, isGstEnabled, onGstToggle }: HeaderProps) {
+export function Header({
+  onAdminClick,
+  showAdminButton = true,
+  isGstEnabled,
+  onGstToggle,
+  isDiscountEnabled,
+  onDiscountToggle,
+}: HeaderProps) {
   return (
     <header className="bg-slate-700 text-white shadow-lg">
       <div className="container mx-auto px-4 py-4">
@@ -38,6 +47,29 @@ export function Header({ onAdminClick, showAdminButton = true, isGstEnabled, onG
                 </button>
                 <span className="text-xs font-semibold px-1 min-w-[30px]">
                   {isGstEnabled ? 'ON' : 'OFF'}
+                </span>
+              </div>
+            )}
+            {onDiscountToggle !== undefined && isDiscountEnabled !== undefined && (
+              <div className="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-600">
+                <span className="text-sm font-medium select-none">Discount:</span>
+                <button
+                  type="button"
+                  onClick={onDiscountToggle}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isDiscountEnabled ? 'bg-blue-600' : 'bg-gray-500'
+                  }`}
+                  data-testid="outer-discount-toggle"
+                  aria-label="Toggle Discount"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      isDiscountEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span className="text-xs font-semibold px-1 min-w-[30px]">
+                  {isDiscountEnabled ? 'ON' : 'OFF'}
                 </span>
               </div>
             )}
