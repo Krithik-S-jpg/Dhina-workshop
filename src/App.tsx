@@ -349,6 +349,10 @@ function App() {
         onAdminClick={handleAdminLogin}
         isGstEnabled={isGstEnabled}
         onGstToggle={() => setIsGstEnabled(!isGstEnabled)}
+        isDiscountEnabled={isDiscountEnabled}
+        onDiscountToggle={() => setIsDiscountEnabled(!isDiscountEnabled)}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        onHsnCodeToggle={() => setIsHsnCodeEnabled(!isHsnCodeEnabled)}
       />
       
       <div className="bg-slate-700 text-white py-12">
