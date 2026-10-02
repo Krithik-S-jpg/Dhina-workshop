@@ -345,7 +345,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onAdminClick={handleAdminLogin} />
+      <Header
+        onAdminClick={handleAdminLogin}
+        isGstEnabled={isGstEnabled}
+        onGstToggle={() => setIsGstEnabled(!isGstEnabled)}
+        isDiscountEnabled={isDiscountEnabled}
+        onDiscountToggle={() => setIsDiscountEnabled(!isDiscountEnabled)}
+        isHsnCodeEnabled={isHsnCodeEnabled}
+        onHsnCodeToggle={() => setIsHsnCodeEnabled(!isHsnCodeEnabled)}
+      />
       
       <div className="bg-slate-700 text-white py-12">
         <div className="container mx-auto px-4 text-center">
